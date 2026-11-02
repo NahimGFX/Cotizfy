@@ -1,0 +1,119 @@
+{
+  "app": {
+    "name": "Cotizfy",
+    "tagline": "Comparador de Presupuestos y Matrices de Precios",
+    "version": "Versión",
+    "ready": "Listo",
+    "connected": "Conectado",
+    "disconnected": "Desconectado"
+  },
+  "nav": {
+    "dashboard": "Panel Principal",
+    "projects": "Proyectos",
+    "compare": "Comparar Matrices",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Resumen general de matrices de precios, proyectos y proveedores",
+    "stats": {
+      "totalProjects": "Proyectos Activos",
+      "totalSuppliers": "Proveedores Registrados",
+      "totalItems": "Ítems Analizados",
+      "potentialSavings": "Ahorro Estimado"
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "newProject": "Nuevo Proyecto",
+      "importExcel": "Importar Excel",
+      "compareSuppliers": "Comparar Proveedores"
+    },
+    "recentProjects": "Proyectos Recientes",
+    "noRecentProjects": "No hay proyectos recientes creados",
+    "createFirstProject": "Comienza creando tu primer proyecto o importando una matriz de Excel.",
+    "marketTrends": "Comparativa de Precios por Proveedor",
+    "chartPlaceholder": "Los gráficos de comparación se activarán al cargar datos de proveedores."
+  },
+  "projects": {
+    "title": "Gestión de Proyectos",
+    "subtitle": "Administra tus proyectos de cotización y matrices de precios",
+    "createButton": "Nuevo Proyecto",
+    "searchPlaceholder": "Buscar proyectos por nombre o cliente...",
+    "table": {
+      "name": "Nombre del Proyecto",
+      "client": "Cliente",
+      "currency": "Moneda",
+      "suppliers": "Proveedores",
+      "items": "Ítems",
+      "lastUpdate": "Última Actualización",
+      "actions": "Acciones"
+    },
+    "noProjects": "No se encontraron proyectos",
+    "createModal": {
+      "title": "Crear Nuevo Proyecto",
+      "nameLabel": "Nombre del proyecto",
+      "namePlaceholder": "Ej. Licitación Obra Hospitalaria Fase 1",
+      "clientLabel": "Cliente / Empresa",
+      "clientPlaceholder": "Ej. Constructora Andina S.A.",
+      "currencyLabel": "Moneda",
+      "descriptionLabel": "Descripción u observaciones",
+      "descriptionPlaceholder": "Detalles adicionales del presupuesto...",
+      "cancel": "Cancelar",
+      "submit": "Crear Proyecto",
+      "success": "Proyecto creado exitosamente"
+    }
+  },
+  "compare": {
+    "title": "Comparador de Matrices",
+    "subtitle": "Análisis comparativo de ofertas económicas por ítem y proveedor",
+    "selectProject": "Selecciona un proyecto para comparar",
+    "emptyState": "Selecciona un proyecto que contenga proveedores para visualizar la comparativa y gráficos estadísticos.",
+    "lowestPrice": "Mejor Precio",
+    "averagePrice": "Promedio",
+    "highestPrice": "Precio Más Alto",
+    "variance": "Diferencial",
+    "bestSupplier": "Proveedor más conveniente"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Preferencias de la aplicación, idioma y base de datos local",
+    "language": {
+      "title": "Idioma de la Interfaz",
+      "description": "Selecciona el idioma predeterminado de la aplicación",
+      "es": "Español",
+      "en": "English",
+      "changedNotification": "Idioma actualizado correctamente"
+    },
+    "database": {
+      "title": "Base de Datos Local (SQLite)",
+      "description": "Estado y ubicación del almacenamiento local gestionado con Prisma",
+      "status": "Estado de conexión",
+      "connected": "Conectado a SQLite",
+      "checkButton": "Verificar Conexión"
+    },
+    "systemInfo": {
+      "title": "Información del Sistema",
+      "desktopEngine": "Motor de escritorio",
+      "frontend": "Frontend",
+      "orm": "ORM y Persistencia"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "export": "Exportar",
+    "import": "Importar",
+    "search": "Buscar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "success": "Operación exitosa",
+    "error": "Ha ocurrido un error",
+    "back": "Atrás",
+    "items": "ítems",
+    "suppliers": "proveedores"
+  }
+}

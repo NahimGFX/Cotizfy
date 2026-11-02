@@ -1,0 +1,119 @@
+{
+  "app": {
+    "name": "Cotizfy",
+    "tagline": "Price Matrix & Budget Comparison Tool",
+    "version": "Version",
+    "ready": "Ready",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "compare": "Compare Matrices",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Control Panel",
+    "subtitle": "Overview of price matrices, projects, and suppliers",
+    "stats": {
+      "totalProjects": "Active Projects",
+      "totalSuppliers": "Registered Suppliers",
+      "totalItems": "Analyzed Items",
+      "potentialSavings": "Estimated Savings"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "newProject": "New Project",
+      "importExcel": "Import Excel",
+      "compareSuppliers": "Compare Suppliers"
+    },
+    "recentProjects": "Recent Projects",
+    "noRecentProjects": "No recent projects found",
+    "createFirstProject": "Get started by creating your first project or importing an Excel matrix.",
+    "marketTrends": "Supplier Price Comparison",
+    "chartPlaceholder": "Comparison charts will activate once supplier data is loaded."
+  },
+  "projects": {
+    "title": "Project Management",
+    "subtitle": "Manage quotation projects and price matrices",
+    "createButton": "New Project",
+    "searchPlaceholder": "Search projects by name or client...",
+    "table": {
+      "name": "Project Name",
+      "client": "Client",
+      "currency": "Currency",
+      "suppliers": "Suppliers",
+      "items": "Items",
+      "lastUpdate": "Last Updated",
+      "actions": "Actions"
+    },
+    "noProjects": "No projects found",
+    "createModal": {
+      "title": "Create New Project",
+      "nameLabel": "Project Name",
+      "namePlaceholder": "e.g. Hospital Construction Tender Phase 1",
+      "clientLabel": "Client / Company",
+      "clientPlaceholder": "e.g. Andes Construction Corp.",
+      "currencyLabel": "Currency",
+      "descriptionLabel": "Description or Notes",
+      "descriptionPlaceholder": "Additional budget details...",
+      "cancel": "Cancel",
+      "submit": "Create Project",
+      "success": "Project created successfully"
+    }
+  },
+  "compare": {
+    "title": "Matrix Comparison",
+    "subtitle": "Comparative economic analysis per item and supplier",
+    "selectProject": "Select a project to compare",
+    "emptyState": "Select a project with suppliers to view the comparison table and statistical charts.",
+    "lowestPrice": "Lowest Price",
+    "averagePrice": "Average",
+    "highestPrice": "Highest Price",
+    "variance": "Variance",
+    "bestSupplier": "Most Cost-Effective Supplier"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Application preferences, language, and local SQLite database",
+    "language": {
+      "title": "Interface Language",
+      "description": "Select the default language for the application",
+      "es": "Español",
+      "en": "English",
+      "changedNotification": "Language updated successfully"
+    },
+    "database": {
+      "title": "Local Database (SQLite)",
+      "description": "Status and location of local storage managed by Prisma",
+      "status": "Connection status",
+      "connected": "Connected to SQLite",
+      "checkButton": "Check Connection"
+    },
+    "systemInfo": {
+      "title": "System Information",
+      "desktopEngine": "Desktop Engine",
+      "frontend": "Frontend",
+      "orm": "ORM & Persistence"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "export": "Export",
+    "import": "Import",
+    "search": "Search",
+    "close": "Close",
+    "confirm": "Confirm",
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "back": "Back",
+    "items": "items",
+    "suppliers": "suppliers"
+  }
+}

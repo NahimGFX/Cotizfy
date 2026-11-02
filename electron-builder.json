@@ -1,0 +1,41 @@
+{
+  "appId": "com.cotizfy.app",
+  "productName": "Cotizfy",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "dist-electron/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "node_modules/.prisma",
+      "to": "node_modules/.prisma"
+    },
+    {
+      "from": "node_modules/@prisma/client",
+      "to": "node_modules/@prisma/client"
+    },
+    {
+      "from": "prisma/schema.prisma",
+      "to": "prisma/schema.prisma"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Cotizfy"
+  }
+}
