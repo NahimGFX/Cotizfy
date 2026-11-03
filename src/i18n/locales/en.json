@@ -51,6 +51,10 @@
       "actions": "Actions"
     },
     "noProjects": "No projects found",
+    "deleteConfirm": "Permanently delete project “{{name}}”?\n\n{{warning}}",
+    "deleteWarning": "Its budget items, quotes, and supplier associations will also be deleted. Suppliers in the shared catalog will be kept.",
+    "deleteSuccess": "Project “{{name}}” was deleted successfully.",
+    "deleteError": "Could not delete the project.",
     "createModal": {
       "title": "Create New Project",
       "nameLabel": "Project Name",
@@ -67,7 +71,25 @@
   },
   "suppliers": { "title": "Suppliers", "subtitle": "Manage your supplier directory and the projects they participate in.", "name": "Supplier name", "contact": "Contact person", "email": "Email", "phone": "Phone", "add": "Add", "newInline": "New supplier", "empty": "No suppliers registered yet.", "noProjects": "No projects", "deleteConfirm": "Delete supplier {{name}}? Its associated quotes will also be deleted." },
   "excel": {
-    "title": "Import Excel matrix", "project": "Project", "choose": "Choose Excel file", "preview": "Import preview", "rowsDetected": "{{count}} budget items detected", "needSuppliers": "This project has {{count}} associated suppliers. Two are needed to assign groups _1 and _2.", "manageSuppliers": "Manage project suppliers", "groupSupplier": "Supplier for group _{{group}}", "selectSupplier": "Select a supplier", "errors": "Errors ({{count}})", "warnings": "Warnings ({{count}})", "description": "Description", "quantity": "Quantity", "unit": "Unit", "supplier": "Supplier", "unitPrice": "Unit price", "totalPrice": "Total price", "projectItems": "Project budget items and quotes", "noItems": "This project has no budget items yet.", "noQuotes": "No quote", "queryError": "Could not load the project items.", "confirmHint": "The import is saved as one transaction; a failure will not leave partial items.", "confirm": "Confirm import", "success": "The matrix was imported successfully.", "readError": "Could not read the Excel file.", "importError": "Could not import the matrix."
+    "title": "Import Excel matrix", "project": "Project", "choose": "Choose Excel file", "preview": "Import preview", "rowsDetected": "{{count}} budget items detected", "groupsDetected": "{{count}} price groups", "needSuppliers": "An associated supplier is required for every detected group.", "assignGroups": "Assign groups to suppliers", "uniqueSupplierPerGroup": "Each supplier can be assigned once because a project stores one quote per supplier and item.", "assignAllGroups": "Associate or create suppliers, then assign one to every group to continue.", "associateExisting": "Associate an existing catalog supplier", "associate": "Associate", "createSupplier": "Create a supplier and associate it with the project", "newSupplierName": "Supplier name", "createAndAssociate": "Create and associate", "suppliersError": "Could not load the supplier catalog.", "supplierAssociateError": "Could not associate the supplier with the project.", "supplierCreateError": "Could not create the supplier.", "manageSuppliers": "Manage project suppliers", "groupSupplier": "Supplier for group _{{group}}", "selectSupplier": "Select a supplier", "errors": "Errors ({{count}})", "warnings": "Warnings ({{count}})", "description": "Description", "quantity": "Quantity", "unit": "Unit", "supplier": "Supplier", "unitPrice": "Unit price", "totalPrice": "Total price", "projectItems": "Project budget items and quotes", "noItems": "This project has no budget items yet.", "noQuotes": "No quote", "queryError": "Could not load the project items.", "confirmHint": "The import is saved as one transaction; a failure will not leave partial items.", "confirm": "Confirm import", "success": "The matrix was imported successfully.", "readError": "Could not read the Excel file.", "importError": "Could not import the matrix."
+  },
+  "matrix": {
+    "title": "Budget item and quote editor",
+    "subtitle": "Changes are saved to SQLite and update the comparison.",
+    "addItem": "Add item",
+    "editItem": "Edit item",
+    "manageQuotes": "Manage quotes",
+    "quotes": "Quotes",
+    "itemNumber": "ITEM",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "invalidQuantity": "Enter a numeric quantity greater than or equal to zero.",
+    "invalidPrice": "Prices must be numeric and greater than or equal to zero. Enter at least one price per supplier.",
+    "deleteItemConfirm": "Delete item {{item}} and all its quotes? This action is permanent.",
+    "deleteQuoteConfirm": "Permanently delete the quote from {{supplier}}?",
+    "totalMismatchConfirm": "Some total prices do not match quantity × unit price. Save anyway?",
+    "totalMismatchWarning": "The quote from {{supplier}} was saved, but its total does not match quantity × unit price."
   },
   "compare": {
     "title": "Matrix Comparison",
@@ -78,7 +100,33 @@
     "averagePrice": "Average",
     "highestPrice": "Highest Price",
     "variance": "Variance",
-    "bestSupplier": "Most Cost-Effective Supplier"
+    "bestSupplier": "Most Cost-Effective Supplier",
+    "suppliersError": "Could not load the project's associated suppliers.",
+    "coverageWarning": "Some items lack comparable pricing: {{without}} have no quotes and {{partial}} are missing a quote from at least one supplier.",
+    "estimatedCheapestCost": "Estimated cost at lowest prices",
+    "estimatedCheapestHelp": "Estimated purchase item by item at the lowest available unit price.",
+    "potentialSavings": "Potential per-item savings",
+    "savingsRate": "{{rate}} of the reference cost using the highest available prices",
+    "cheapestSupplierTotal": "Lowest quoted total",
+    "highestSupplierTotal": "Highest quoted total",
+    "incompleteComparison": "Actual totals; coverage differs, not directly comparable",
+    "completeCoverage": "All suppliers quoted every item",
+    "actualQuoted": "Actual quoted total",
+    "itemsQuoted": "Items quoted",
+    "lowestWins": "Unique lowest price",
+    "ties": "Ties at the lowest price",
+    "differenceCheapest": "Difference vs. lowest total",
+    "itemComparison": "Item-by-item comparison",
+    "unitPriceAndTotals": "Blank prices are not treated as zero. Lowest price is based on unit price.",
+    "noQuote": "No quote",
+    "tie": "Tie",
+    "priceDifference": "High–low difference",
+    "percentDifference": "Difference %",
+    "chartTotals": "Actual quoted total by supplier",
+    "chartWins": "Items won (unique lowest)",
+    "chartDifferences": "Price difference by item (quantity included)",
+    "chartDistribution": "Quote distribution",
+    "distributionCaption": "{{count}} quotes recorded in this project."
   },
   "settings": {
     "title": "Settings",

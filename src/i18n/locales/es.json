@@ -51,6 +51,10 @@
       "actions": "Acciones"
     },
     "noProjects": "No se encontraron proyectos",
+    "deleteConfirm": "¿Eliminar permanentemente el proyecto «{{name}}»?\n\n{{warning}}",
+    "deleteWarning": "También se eliminarán sus items, cotizaciones y asociaciones con proveedores. Los proveedores del catálogo general se conservarán.",
+    "deleteSuccess": "El proyecto «{{name}}» se eliminó correctamente.",
+    "deleteError": "No se pudo eliminar el proyecto.",
     "createModal": {
       "title": "Crear Nuevo Proyecto",
       "nameLabel": "Nombre del proyecto",
@@ -67,7 +71,25 @@
   },
   "suppliers": { "title": "Proveedores", "subtitle": "Administra tu directorio de proveedores y sus proyectos asociados.", "name": "Nombre del proveedor", "contact": "Persona de contacto", "email": "Correo electrónico", "phone": "Teléfono", "add": "Agregar", "newInline": "Nuevo proveedor", "empty": "Aún no hay proveedores registrados.", "noProjects": "Sin proyectos", "deleteConfirm": "¿Eliminar al proveedor {{name}}? Sus cotizaciones asociadas también se eliminarán." },
   "excel": {
-    "title": "Importar matriz Excel", "project": "Proyecto", "choose": "Elegir archivo Excel", "preview": "Vista previa de importación", "rowsDetected": "{{count}} partidas detectadas", "needSuppliers": "El proyecto tiene {{count}} proveedores asociados. Se requieren dos para asignar los grupos _1 y _2.", "manageSuppliers": "Gestionar proveedores del proyecto", "groupSupplier": "Proveedor para el grupo _{{group}}", "selectSupplier": "Selecciona un proveedor", "errors": "Errores ({{count}})", "warnings": "Advertencias ({{count}})", "description": "Descripción", "quantity": "Cantidad", "unit": "Unidad", "supplier": "Proveedor", "unitPrice": "Precio unitario", "totalPrice": "Precio total", "projectItems": "Partidas y cotizaciones del proyecto", "noItems": "Todavía no hay partidas para este proyecto.", "noQuotes": "Sin cotización", "queryError": "No se pudieron consultar las partidas.", "confirmHint": "La importación se guardará como una operación única; si falla, no quedarán partidas parciales.", "confirm": "Confirmar importación", "success": "La matriz se importó correctamente.", "readError": "No se pudo leer el archivo Excel.", "importError": "No se pudo importar la matriz."
+    "title": "Importar matriz Excel", "project": "Proyecto", "choose": "Elegir archivo Excel", "preview": "Vista previa de importación", "rowsDetected": "{{count}} items detectadas", "groupsDetected": "{{count}} grupos de precios", "needSuppliers": "Se requiere un proveedor asociado para cada grupo detectado.", "assignGroups": "Asignar grupos a proveedores", "uniqueSupplierPerGroup": "Cada proveedor se asigna una sola vez porque el proyecto guarda una cotización por proveedor y item.", "assignAllGroups": "Asocia o crea proveedores y asigna uno a cada grupo para continuar.", "associateExisting": "Asociar proveedor existente del catálogo", "associate": "Asociar", "createSupplier": "Crear un proveedor y asociarlo al proyecto", "newSupplierName": "Nombre del proveedor", "createAndAssociate": "Crear y asociar", "suppliersError": "No se pudo consultar el catálogo de proveedores.", "supplierAssociateError": "No se pudo asociar el proveedor al proyecto.", "supplierCreateError": "No se pudo crear el proveedor.", "manageSuppliers": "Gestionar proveedores del proyecto", "groupSupplier": "Proveedor para el grupo _{{group}}", "selectSupplier": "Selecciona un proveedor", "errors": "Errores ({{count}})", "warnings": "Advertencias ({{count}})", "description": "Descripción", "quantity": "Cantidad", "unit": "Unidad", "supplier": "Proveedor", "unitPrice": "Precio unitario", "totalPrice": "Precio total", "projectItems": "Items y cotizaciones del proyecto", "noItems": "Todavía no hay items para este proyecto.", "noQuotes": "Sin cotización", "queryError": "No se pudieron consultar las items.", "confirmHint": "La importación se guardará como una operación única; si falla, no quedarán items parciales.", "confirm": "Confirmar importación", "success": "La matriz se importó correctamente.", "readError": "No se pudo leer el archivo Excel.", "importError": "No se pudo importar la matriz."
+  },
+  "matrix": {
+    "title": "Editor de items y cotizaciones",
+    "subtitle": "Los cambios se guardan en SQLite y actualizan la comparación.",
+    "addItem": "Agregar item",
+    "editItem": "Editar item",
+    "manageQuotes": "Gestionar cotizaciones",
+    "quotes": "Cotizaciones",
+    "itemNumber": "ITEM",
+    "description": "Descripción",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "invalidQuantity": "Ingresa una cantidad numérica igual o mayor que cero.",
+    "invalidPrice": "Los precios deben ser numéricos, iguales o mayores que cero. Ingresa al menos un precio por proveedor.",
+    "deleteItemConfirm": "¿Eliminar la item {{item}} y todas sus cotizaciones? Esta acción es permanente.",
+    "deleteQuoteConfirm": "¿Eliminar permanentemente la cotización de {{supplier}}?",
+    "totalMismatchConfirm": "Algunos precios totales no coinciden con cantidad × precio unitario. ¿Guardar de todas formas?",
+    "totalMismatchWarning": "La cotización de {{supplier}} se guardó, pero su total no coincide con cantidad × precio unitario."
   },
   "compare": {
     "title": "Comparador de Matrices",
@@ -78,7 +100,33 @@
     "averagePrice": "Promedio",
     "highestPrice": "Precio Más Alto",
     "variance": "Diferencial",
-    "bestSupplier": "Proveedor más conveniente"
+    "bestSupplier": "Proveedor más conveniente",
+    "suppliersError": "No se pudieron consultar los proveedores asociados.",
+    "coverageWarning": "Hay items sin precios comparables: {{without}} sin ninguna cotización y {{partial}} sin cotización de algún proveedor.",
+    "estimatedCheapestCost": "Costo estimado al menor precio",
+    "estimatedCheapestHelp": "Compra estimada item por item al menor precio unitario disponible.",
+    "potentialSavings": "Ahorro potencial por item",
+    "savingsRate": "{{rate}} del costo de referencia con precios más altos",
+    "cheapestSupplierTotal": "Menor total cotizado",
+    "highestSupplierTotal": "Mayor total cotizado",
+    "incompleteComparison": "Totales reales; cobertura distinta, no directamente comparables",
+    "completeCoverage": "Todos cotizaron todas las items",
+    "actualQuoted": "Total realmente cotizado",
+    "itemsQuoted": "Items cotizadas",
+    "lowestWins": "Menor precio único",
+    "ties": "Empates en el menor precio",
+    "differenceCheapest": "Diferencia vs. menor total",
+    "itemComparison": "Comparación por item",
+    "unitPriceAndTotals": "Los precios vacíos no se tratan como cero. El mínimo se compara por precio unitario.",
+    "noQuote": "Sin cotización",
+    "tie": "Empate",
+    "priceDifference": "Diferencia máxima–mínima",
+    "percentDifference": "Diferencia %",
+    "chartTotals": "Total realmente cotizado por proveedor",
+    "chartWins": "Items ganadas (mínimo único)",
+    "chartDifferences": "Diferencia de precios por item (cantidad incluida)",
+    "chartDistribution": "Distribución de cotizaciones",
+    "distributionCaption": "{{count}} cotizaciones registradas en el proyecto."
   },
   "settings": {
     "title": "Configuración",

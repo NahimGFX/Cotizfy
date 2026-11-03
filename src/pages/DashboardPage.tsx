@@ -24,6 +24,8 @@ import { fetchProjects } from '../services/api';
 import type { ProjectSummary } from '../../electron/preload/types';
 import { formatCurrency, formatNumber, formatDate } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
+import { api } from '../services/api';
+import { calculatePriceComparison } from '../utils/priceComparison';
 
 interface DashboardPageProps {
   onNavigate: (tab: string) => void;
@@ -40,14 +42,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [potentialSavings, setPotentialSavings] = useState<{ amount: number; currency: string } | null>({ amount: 0, currency: 'USD' });
 
   useEffect(() => {
-    fetchProjects().then((res) => {
+    let current = true;
+    void (async () => {
+      const res = await fetchProjects();
+      if (!current) return;
       if (res.success && res.data) {
         setProjects(res.data);
-      }
-      setLoading(false);
-    });
+        const currencies = [...new Set(res.data.map(project => project.currency))];
+        const results = await Promise.all(res.data.map(async project => {
+          const [itemsResult, suppliersResult] = await Promise.all([api.getProjectItems(project.id), api.getProjectSuppliers(project.id)]);
+          if (!itemsResult.success || !itemsResult.data || !suppliersResult.success || !suppliersResult.data) return null;
+          return calculatePriceComparison(itemsResult.data, suppliersResult.data.map(supplier => ({ id: supplier.id, name: supplier.name }))).potentialSavings;
+        }));
+        if (current) setPotentialSavings(currencies.length <= 1 && results.every(value => value !== null) ? { amount: results.reduce<number>((sum, value) => sum + (value ?? 0), 0), currency: currencies[0] || 'USD' } : null);
+      } else setPotentialSavings(null);
+      if (current) setLoading(false);
+    })();
+    return () => { current = false; };
   }, []);
 
   const totalSuppliers = projects.reduce((acc, p) => acc + p.suppliersCount, 0);
@@ -123,7 +137,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               {t('dashboard.stats.potentialSavings')}
             </p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-              {formatCurrency(12450, 'USD')}
+              {potentialSavings ? formatCurrency(potentialSavings.amount, potentialSavings.currency) : '—'}
             </p>
           </div>
           <div className="w-11 h-11 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center">

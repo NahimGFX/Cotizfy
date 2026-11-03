@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, FolderKanban, Users, Layers, ExternalLink } from 'lucide-react';
+import { Plus, Search, FolderKanban, Users, Layers, ExternalLink, Trash2 } from 'lucide-react';
 import type { ProjectSummary } from '../../electron/preload/types';
 import { formatDate } from '../utils/formatters';
 
@@ -10,6 +10,7 @@ interface ProjectsPageProps {
   onOpenCreateModal: () => void;
   onSelectProject: (projectId: string) => void;
   onEditProject: (project: ProjectSummary) => void;
+  onDeleteProject: (project: ProjectSummary) => void;
 }
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
@@ -18,6 +19,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onOpenCreateModal,
   onSelectProject,
   onEditProject,
+  onDeleteProject,
 }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,7 +66,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       </div>
 
       {/* Projects Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
         {loading ? (
           <div className="p-12 text-center text-sm text-slate-400">
             {t('common.loading')}
@@ -89,7 +91,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800">
                 <th className="py-3 px-4">{t('projects.table.name')}</th>
                 <th className="py-3 px-4">{t('projects.table.client')}</th>
                 <th className="py-3 px-4">{t('projects.table.currency')}</th>
@@ -99,20 +101,20 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                 <th className="py-3 px-4 text-right">{t('projects.table.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
               {filteredProjects.map((project) => (
                 <tr
                   key={project.id}
-                  className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                  className="cursor-pointer transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/60"
                   onClick={() => onSelectProject(project.id)}
                 >
                   <td className="py-3.5 px-4">
-                    <div className="font-semibold text-slate-900">{project.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{project.name}</div>
                     {project.description && (
                       <div className="text-xs text-slate-400 truncate max-w-xs">{project.description}</div>
                     )}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-600 font-medium">
+                  <td className="px-4 py-3.5 font-medium text-slate-600 dark:text-slate-300">
                     {project.client || '-'}
                   </td>
                   <td className="py-3.5 px-4">
@@ -138,6 +140,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     <button type="button" onClick={e => { e.stopPropagation(); onEditProject(project); }} className="mr-1 p-1.5 hover:bg-slate-200/60 rounded-md text-slate-500" title={t('common.edit')}><span className="sr-only">{t('common.edit')}</span>✎</button>
+                    <button type="button" onClick={e => { e.stopPropagation(); onDeleteProject(project); }} className="mr-1 rounded-md p-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40" title={t('common.delete')} aria-label={`${t('common.delete')}: ${project.name}`}><Trash2 className="h-4 w-4"/></button>
                     <button
                       type="button"
                       onClick={(e) => {
