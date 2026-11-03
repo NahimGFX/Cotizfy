@@ -1,0 +1,184 @@
+{
+  "app": {
+    "name": "Cotizfy",
+    "tagline": "Price Matrix & Budget Comparison Tool",
+    "version": "Version",
+    "ready": "Ready",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "suppliers": "Suppliers",
+    "compare": "Compare Matrices",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Control Panel",
+    "subtitle": "Overview of price matrices, projects, and suppliers",
+    "stats": {
+      "totalProjects": "Active Projects",
+      "totalSuppliers": "Registered Suppliers",
+      "totalItems": "Analyzed Items",
+      "potentialSavings": "Estimated Savings"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "newProject": "New Project",
+      "importExcel": "Import Excel",
+      "compareSuppliers": "Compare Suppliers"
+    },
+    "recentProjects": "Recent Projects",
+    "noRecentProjects": "No recent projects found",
+    "createFirstProject": "Get started by creating your first project or importing an Excel matrix.",
+    "marketTrends": "Supplier Price Comparison",
+    "chartPlaceholder": "Comparison charts will activate once supplier data is loaded."
+  },
+  "projects": {
+    "title": "Project Management",
+    "subtitle": "Manage quotation projects and price matrices",
+    "editModalTitle": "Edit project",
+    "createButton": "New Project",
+    "searchPlaceholder": "Search projects by name or client...",
+    "table": {
+      "name": "Project Name",
+      "client": "Client",
+      "currency": "Currency",
+      "suppliers": "Suppliers",
+      "items": "Items",
+      "lastUpdate": "Last Updated",
+      "actions": "Actions"
+    },
+    "noProjects": "No projects found",
+    "deleteConfirm": "Permanently delete project “{{name}}”?\n\n{{warning}}",
+    "deleteWarning": "Its budget items, quotes, and supplier associations will also be deleted. Suppliers in the shared catalog will be kept.",
+    "deleteSuccess": "Project “{{name}}” was deleted successfully.",
+    "deleteError": "Could not delete the project.",
+    "createModal": {
+      "title": "Create New Project",
+      "nameLabel": "Project Name",
+      "namePlaceholder": "e.g. Hospital Construction Tender Phase 1",
+      "clientLabel": "Client / Company",
+      "clientPlaceholder": "e.g. Andes Construction Corp.",
+      "currencyLabel": "Currency",
+      "descriptionLabel": "Description or Notes",
+      "descriptionPlaceholder": "Additional budget details...",
+      "cancel": "Cancel",
+      "submit": "Create Project",
+      "success": "Project created successfully"
+    }
+  },
+  "suppliers": { "title": "Suppliers", "subtitle": "Manage your supplier directory and the projects they participate in.", "name": "Supplier name", "contact": "Contact person", "email": "Email", "phone": "Phone", "add": "Add", "newInline": "New supplier", "empty": "No suppliers registered yet.", "noProjects": "No projects", "deleteConfirm": "Delete supplier {{name}}? Its associated quotes will also be deleted." },
+  "excel": {
+    "title": "Import Excel matrix", "project": "Project", "choose": "Choose Excel file", "preview": "Import preview", "rowsDetected": "{{count}} budget items detected", "groupsDetected": "{{count}} price groups", "needSuppliers": "An associated supplier is required for every detected group.", "assignGroups": "Assign groups to suppliers", "uniqueSupplierPerGroup": "Each supplier can be assigned once because a project stores one quote per supplier and item.", "assignAllGroups": "Associate or create suppliers, then assign one to every group to continue.", "associateExisting": "Associate an existing catalog supplier", "associate": "Associate", "createSupplier": "Create a supplier and associate it with the project", "newSupplierName": "Supplier name", "createAndAssociate": "Create and associate", "suppliersError": "Could not load the supplier catalog.", "supplierAssociateError": "Could not associate the supplier with the project.", "supplierCreateError": "Could not create the supplier.", "manageSuppliers": "Manage project suppliers", "groupSupplier": "Supplier for group _{{group}}", "selectSupplier": "Select a supplier", "errors": "Errors ({{count}})", "warnings": "Warnings ({{count}})", "description": "Description", "quantity": "Quantity", "unit": "Unit", "supplier": "Supplier", "unitPrice": "Unit price", "totalPrice": "Total price", "projectItems": "Project budget items and quotes", "noItems": "This project has no budget items yet.", "noQuotes": "No quote", "queryError": "Could not load the project items.", "confirmHint": "The import is saved as one transaction; a failure will not leave partial items.", "confirm": "Confirm import", "success": "The matrix was imported successfully.", "readError": "Could not read the Excel file.", "importError": "Could not import the matrix."
+  },
+  "matrix": {
+    "title": "Budget item and quote editor",
+    "subtitle": "Changes are saved to SQLite and update the comparison.",
+    "addItem": "Add item",
+    "editItem": "Edit item",
+    "manageQuotes": "Manage quotes",
+    "quotes": "Quotes",
+    "itemNumber": "ITEM",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "invalidQuantity": "Enter a numeric quantity greater than or equal to zero.",
+    "invalidPrice": "Prices must be numeric and greater than or equal to zero. Enter at least one price per supplier.",
+    "deleteItemConfirm": "Delete item {{item}} and all its quotes? This action is permanent.",
+    "deleteQuoteConfirm": "Permanently delete the quote from {{supplier}}?",
+    "totalMismatchConfirm": "Some total prices do not match quantity × unit price. Save anyway?",
+    "totalMismatchWarning": "The quote from {{supplier}} was saved, but its total does not match quantity × unit price."
+  },
+  "compare": {
+    "title": "Matrix Comparison",
+    "subtitle": "Comparative economic analysis per item and supplier",
+    "selectProject": "Select a project to compare",
+    "emptyState": "Select a project with suppliers to view the comparison table and statistical charts.",
+    "lowestPrice": "Lowest Price",
+    "averagePrice": "Average",
+    "highestPrice": "Highest Price",
+    "variance": "Variance",
+    "bestSupplier": "Most Cost-Effective Supplier",
+    "suppliersError": "Could not load the project's associated suppliers.",
+    "coverageWarning": "Some items lack comparable pricing: {{without}} have no quotes and {{partial}} are missing a quote from at least one supplier.",
+    "estimatedCheapestCost": "Estimated cost at lowest prices",
+    "estimatedCheapestHelp": "Estimated purchase item by item at the lowest available unit price.",
+    "potentialSavings": "Potential per-item savings",
+    "savingsRate": "{{rate}} of the reference cost using the highest available prices",
+    "cheapestSupplierTotal": "Lowest quoted total",
+    "highestSupplierTotal": "Highest quoted total",
+    "incompleteComparison": "Actual totals; coverage differs, not directly comparable",
+    "completeCoverage": "All suppliers quoted every item",
+    "actualQuoted": "Actual quoted total",
+    "itemsQuoted": "Items quoted",
+    "lowestWins": "Unique lowest price",
+    "ties": "Ties at the lowest price",
+    "differenceCheapest": "Difference vs. lowest total",
+    "itemComparison": "Item-by-item comparison",
+    "unitPriceAndTotals": "Blank prices are not treated as zero. Lowest price is based on unit price.",
+    "noQuote": "No quote",
+    "tie": "Tie",
+    "priceDifference": "High–low difference",
+    "percentDifference": "Difference %",
+    "chartTotals": "Actual quoted total by supplier",
+    "chartWins": "Items won (unique lowest)",
+    "chartDifferences": "Price difference by item (quantity included)",
+    "chartDistribution": "Quote distribution",
+    "distributionCaption": "{{count}} quotes recorded in this project."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Application preferences, language, and local SQLite database",
+    "appearance": {
+      "title": "Theme & Appearance",
+      "description": "Customize the visual appearance of the application",
+      "light": "Light Mode",
+      "lightDesc": "Clean light background optimized for daytime focus",
+      "dark": "Dark Mode",
+      "darkDesc": "Easy on the eyes with gentle contrast",
+      "system": "Automatic (System)",
+      "systemDesc": "Synchronized with your operating system preference",
+      "changedNotification": "Theme updated successfully"
+    },
+    "language": {
+      "title": "Interface Language",
+      "description": "Select the default language for the application",
+      "es": "Español",
+      "en": "English",
+      "changedNotification": "Language updated successfully"
+    },
+    "database": {
+      "title": "Local Database (SQLite)",
+      "description": "Status and location of local storage managed by Prisma",
+      "status": "Connection status",
+      "connected": "Connected to SQLite",
+      "checkButton": "Check Connection"
+    },
+    "systemInfo": {
+      "title": "System Information",
+      "desktopEngine": "Desktop Engine",
+      "frontend": "Frontend",
+      "orm": "ORM & Persistence"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "export": "Export",
+    "import": "Import",
+    "search": "Search",
+    "close": "Close",
+    "confirm": "Confirm",
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "back": "Back",
+    "items": "items",
+    "suppliers": "suppliers"
+  }
+}

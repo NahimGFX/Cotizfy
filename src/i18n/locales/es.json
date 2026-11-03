@@ -1,0 +1,184 @@
+{
+  "app": {
+    "name": "Cotizfy",
+    "tagline": "Comparador de Presupuestos y Matrices de Precios",
+    "version": "Versión",
+    "ready": "Listo",
+    "connected": "Conectado",
+    "disconnected": "Desconectado"
+  },
+  "nav": {
+    "dashboard": "Panel Principal",
+    "projects": "Proyectos",
+    "suppliers": "Proveedores",
+    "compare": "Comparar Matrices",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Resumen general de matrices de precios, proyectos y proveedores",
+    "stats": {
+      "totalProjects": "Proyectos Activos",
+      "totalSuppliers": "Proveedores Registrados",
+      "totalItems": "Ítems Analizados",
+      "potentialSavings": "Ahorro Estimado"
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "newProject": "Nuevo Proyecto",
+      "importExcel": "Importar Excel",
+      "compareSuppliers": "Comparar Proveedores"
+    },
+    "recentProjects": "Proyectos Recientes",
+    "noRecentProjects": "No hay proyectos recientes creados",
+    "createFirstProject": "Comienza creando tu primer proyecto o importando una matriz de Excel.",
+    "marketTrends": "Comparativa de Precios por Proveedor",
+    "chartPlaceholder": "Los gráficos de comparación se activarán al cargar datos de proveedores."
+  },
+  "projects": {
+    "title": "Gestión de Proyectos",
+    "subtitle": "Administra tus proyectos de cotización y matrices de precios",
+    "editModalTitle": "Editar proyecto",
+    "createButton": "Nuevo Proyecto",
+    "searchPlaceholder": "Buscar proyectos por nombre o cliente...",
+    "table": {
+      "name": "Nombre del Proyecto",
+      "client": "Cliente",
+      "currency": "Moneda",
+      "suppliers": "Proveedores",
+      "items": "Ítems",
+      "lastUpdate": "Última Actualización",
+      "actions": "Acciones"
+    },
+    "noProjects": "No se encontraron proyectos",
+    "deleteConfirm": "¿Eliminar permanentemente el proyecto «{{name}}»?\n\n{{warning}}",
+    "deleteWarning": "También se eliminarán sus items, cotizaciones y asociaciones con proveedores. Los proveedores del catálogo general se conservarán.",
+    "deleteSuccess": "El proyecto «{{name}}» se eliminó correctamente.",
+    "deleteError": "No se pudo eliminar el proyecto.",
+    "createModal": {
+      "title": "Crear Nuevo Proyecto",
+      "nameLabel": "Nombre del proyecto",
+      "namePlaceholder": "Ej. Licitación Obra Hospitalaria Fase 1",
+      "clientLabel": "Cliente / Empresa",
+      "clientPlaceholder": "Ej. Constructora Andina S.A.",
+      "currencyLabel": "Moneda",
+      "descriptionLabel": "Descripción u observaciones",
+      "descriptionPlaceholder": "Detalles adicionales del presupuesto...",
+      "cancel": "Cancelar",
+      "submit": "Crear Proyecto",
+      "success": "Proyecto creado exitosamente"
+    }
+  },
+  "suppliers": { "title": "Proveedores", "subtitle": "Administra tu directorio de proveedores y sus proyectos asociados.", "name": "Nombre del proveedor", "contact": "Persona de contacto", "email": "Correo electrónico", "phone": "Teléfono", "add": "Agregar", "newInline": "Nuevo proveedor", "empty": "Aún no hay proveedores registrados.", "noProjects": "Sin proyectos", "deleteConfirm": "¿Eliminar al proveedor {{name}}? Sus cotizaciones asociadas también se eliminarán." },
+  "excel": {
+    "title": "Importar matriz Excel", "project": "Proyecto", "choose": "Elegir archivo Excel", "preview": "Vista previa de importación", "rowsDetected": "{{count}} items detectadas", "groupsDetected": "{{count}} grupos de precios", "needSuppliers": "Se requiere un proveedor asociado para cada grupo detectado.", "assignGroups": "Asignar grupos a proveedores", "uniqueSupplierPerGroup": "Cada proveedor se asigna una sola vez porque el proyecto guarda una cotización por proveedor y item.", "assignAllGroups": "Asocia o crea proveedores y asigna uno a cada grupo para continuar.", "associateExisting": "Asociar proveedor existente del catálogo", "associate": "Asociar", "createSupplier": "Crear un proveedor y asociarlo al proyecto", "newSupplierName": "Nombre del proveedor", "createAndAssociate": "Crear y asociar", "suppliersError": "No se pudo consultar el catálogo de proveedores.", "supplierAssociateError": "No se pudo asociar el proveedor al proyecto.", "supplierCreateError": "No se pudo crear el proveedor.", "manageSuppliers": "Gestionar proveedores del proyecto", "groupSupplier": "Proveedor para el grupo _{{group}}", "selectSupplier": "Selecciona un proveedor", "errors": "Errores ({{count}})", "warnings": "Advertencias ({{count}})", "description": "Descripción", "quantity": "Cantidad", "unit": "Unidad", "supplier": "Proveedor", "unitPrice": "Precio unitario", "totalPrice": "Precio total", "projectItems": "Items y cotizaciones del proyecto", "noItems": "Todavía no hay items para este proyecto.", "noQuotes": "Sin cotización", "queryError": "No se pudieron consultar las items.", "confirmHint": "La importación se guardará como una operación única; si falla, no quedarán items parciales.", "confirm": "Confirmar importación", "success": "La matriz se importó correctamente.", "readError": "No se pudo leer el archivo Excel.", "importError": "No se pudo importar la matriz."
+  },
+  "matrix": {
+    "title": "Editor de items y cotizaciones",
+    "subtitle": "Los cambios se guardan en SQLite y actualizan la comparación.",
+    "addItem": "Agregar item",
+    "editItem": "Editar item",
+    "manageQuotes": "Gestionar cotizaciones",
+    "quotes": "Cotizaciones",
+    "itemNumber": "ITEM",
+    "description": "Descripción",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "invalidQuantity": "Ingresa una cantidad numérica igual o mayor que cero.",
+    "invalidPrice": "Los precios deben ser numéricos, iguales o mayores que cero. Ingresa al menos un precio por proveedor.",
+    "deleteItemConfirm": "¿Eliminar la item {{item}} y todas sus cotizaciones? Esta acción es permanente.",
+    "deleteQuoteConfirm": "¿Eliminar permanentemente la cotización de {{supplier}}?",
+    "totalMismatchConfirm": "Algunos precios totales no coinciden con cantidad × precio unitario. ¿Guardar de todas formas?",
+    "totalMismatchWarning": "La cotización de {{supplier}} se guardó, pero su total no coincide con cantidad × precio unitario."
+  },
+  "compare": {
+    "title": "Comparador de Matrices",
+    "subtitle": "Análisis comparativo de ofertas económicas por ítem y proveedor",
+    "selectProject": "Selecciona un proyecto para comparar",
+    "emptyState": "Selecciona un proyecto que contenga proveedores para visualizar la comparativa y gráficos estadísticos.",
+    "lowestPrice": "Mejor Precio",
+    "averagePrice": "Promedio",
+    "highestPrice": "Precio Más Alto",
+    "variance": "Diferencial",
+    "bestSupplier": "Proveedor más conveniente",
+    "suppliersError": "No se pudieron consultar los proveedores asociados.",
+    "coverageWarning": "Hay items sin precios comparables: {{without}} sin ninguna cotización y {{partial}} sin cotización de algún proveedor.",
+    "estimatedCheapestCost": "Costo estimado al menor precio",
+    "estimatedCheapestHelp": "Compra estimada item por item al menor precio unitario disponible.",
+    "potentialSavings": "Ahorro potencial por item",
+    "savingsRate": "{{rate}} del costo de referencia con precios más altos",
+    "cheapestSupplierTotal": "Menor total cotizado",
+    "highestSupplierTotal": "Mayor total cotizado",
+    "incompleteComparison": "Totales reales; cobertura distinta, no directamente comparables",
+    "completeCoverage": "Todos cotizaron todas las items",
+    "actualQuoted": "Total realmente cotizado",
+    "itemsQuoted": "Items cotizadas",
+    "lowestWins": "Menor precio único",
+    "ties": "Empates en el menor precio",
+    "differenceCheapest": "Diferencia vs. menor total",
+    "itemComparison": "Comparación por item",
+    "unitPriceAndTotals": "Los precios vacíos no se tratan como cero. El mínimo se compara por precio unitario.",
+    "noQuote": "Sin cotización",
+    "tie": "Empate",
+    "priceDifference": "Diferencia máxima–mínima",
+    "percentDifference": "Diferencia %",
+    "chartTotals": "Total realmente cotizado por proveedor",
+    "chartWins": "Items ganadas (mínimo único)",
+    "chartDifferences": "Diferencia de precios por item (cantidad incluida)",
+    "chartDistribution": "Distribución de cotizaciones",
+    "distributionCaption": "{{count}} cotizaciones registradas en el proyecto."
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Preferencias de la aplicación, idioma y base de datos local",
+    "appearance": {
+      "title": "Tema y Apariencia",
+      "description": "Personaliza el aspecto visual de la aplicación",
+      "light": "Modo Claro",
+      "lightDesc": "Fondo claro optimizado para trabajo diurno",
+      "dark": "Modo Oscuro",
+      "darkDesc": "Agradable a la vista con contraste suave",
+      "system": "Automático (Sistema)",
+      "systemDesc": "Sincronizado con la preferencia del sistema operativo",
+      "changedNotification": "Tema actualizado correctamente"
+    },
+    "language": {
+      "title": "Idioma de la Interfaz",
+      "description": "Selecciona el idioma predeterminado de la aplicación",
+      "es": "Español",
+      "en": "English",
+      "changedNotification": "Idioma actualizado correctamente"
+    },
+    "database": {
+      "title": "Base de Datos Local (SQLite)",
+      "description": "Estado y ubicación del almacenamiento local gestionado con Prisma",
+      "status": "Estado de conexión",
+      "connected": "Conectado a SQLite",
+      "checkButton": "Verificar Conexión"
+    },
+    "systemInfo": {
+      "title": "Información del Sistema",
+      "desktopEngine": "Motor de escritorio",
+      "frontend": "Frontend",
+      "orm": "ORM y Persistencia"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "export": "Exportar",
+    "import": "Importar",
+    "search": "Buscar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "success": "Operación exitosa",
+    "error": "Ha ocurrido un error",
+    "back": "Atrás",
+    "items": "ítems",
+    "suppliers": "proveedores"
+  }
+}
