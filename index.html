@@ -5,8 +5,29 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:5173 ws://localhost:5173;" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cotizfy - Comparador de Presupuestos y Matrices de Precios</title>
+    <!-- Prevent theme flashing (FOUC) before React mounts -->
+    <script>
+      (function() {
+        try {
+          var mode = localStorage.getItem('cotizfy_theme') || 'system';
+          var isDark = false;
+          if (mode === 'dark') {
+            isDark = true;
+          } else if (mode === 'system') {
+            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          // Fallback ignore
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased selection:bg-teal-500 selection:text-white transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

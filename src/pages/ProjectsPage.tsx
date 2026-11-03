@@ -9,6 +9,7 @@ interface ProjectsPageProps {
   loading: boolean;
   onOpenCreateModal: () => void;
   onSelectProject: (projectId: string) => void;
+  onEditProject: (project: ProjectSummary) => void;
 }
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
@@ -16,6 +17,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   loading,
   onOpenCreateModal,
   onSelectProject,
+  onEditProject,
 }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,6 +125,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                       <Users className="w-3.5 h-3.5 text-slate-400" />
                       <span>{project.suppliersCount}</span>
                     </span>
+                    {project.supplierNames.length > 0 && <div className="mt-1 max-w-40 truncate text-[10px] text-slate-400" title={project.supplierNames.join(', ')}>{project.supplierNames.join(', ')}</div>}
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     <span className="inline-flex items-center space-x-1 text-xs text-slate-600 font-medium">
@@ -134,6 +137,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                     {formatDate(project.updatedAt, 'short')}
                   </td>
                   <td className="py-3.5 px-4 text-right">
+                    <button type="button" onClick={e => { e.stopPropagation(); onEditProject(project); }} className="mr-1 p-1.5 hover:bg-slate-200/60 rounded-md text-slate-500" title={t('common.edit')}><span className="sr-only">{t('common.edit')}</span>✎</button>
                     <button
                       type="button"
                       onClick={(e) => {

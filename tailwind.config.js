@@ -8,6 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        app: 'var(--bg-app)',
+        card: 'var(--bg-card)',
+        subtle: 'var(--bg-subtle)',
         primary: {
           50: '#f0fdfa',
           100: '#ccfbf1',

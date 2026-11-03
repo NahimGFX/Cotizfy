@@ -10,6 +10,7 @@
   "nav": {
     "dashboard": "Panel Principal",
     "projects": "Proyectos",
+    "suppliers": "Proveedores",
     "compare": "Comparar Matrices",
     "settings": "Configuración"
   },
@@ -37,6 +38,7 @@
   "projects": {
     "title": "Gestión de Proyectos",
     "subtitle": "Administra tus proyectos de cotización y matrices de precios",
+    "editModalTitle": "Editar proyecto",
     "createButton": "Nuevo Proyecto",
     "searchPlaceholder": "Buscar proyectos por nombre o cliente...",
     "table": {
@@ -63,6 +65,10 @@
       "success": "Proyecto creado exitosamente"
     }
   },
+  "suppliers": { "title": "Proveedores", "subtitle": "Administra tu directorio de proveedores y sus proyectos asociados.", "name": "Nombre del proveedor", "contact": "Persona de contacto", "email": "Correo electrónico", "phone": "Teléfono", "add": "Agregar", "newInline": "Nuevo proveedor", "empty": "Aún no hay proveedores registrados.", "noProjects": "Sin proyectos", "deleteConfirm": "¿Eliminar al proveedor {{name}}? Sus cotizaciones asociadas también se eliminarán." },
+  "excel": {
+    "title": "Importar matriz Excel", "project": "Proyecto", "choose": "Elegir archivo Excel", "preview": "Vista previa de importación", "rowsDetected": "{{count}} partidas detectadas", "needSuppliers": "El proyecto tiene {{count}} proveedores asociados. Se requieren dos para asignar los grupos _1 y _2.", "manageSuppliers": "Gestionar proveedores del proyecto", "groupSupplier": "Proveedor para el grupo _{{group}}", "selectSupplier": "Selecciona un proveedor", "errors": "Errores ({{count}})", "warnings": "Advertencias ({{count}})", "description": "Descripción", "quantity": "Cantidad", "unit": "Unidad", "supplier": "Proveedor", "unitPrice": "Precio unitario", "totalPrice": "Precio total", "projectItems": "Partidas y cotizaciones del proyecto", "noItems": "Todavía no hay partidas para este proyecto.", "noQuotes": "Sin cotización", "queryError": "No se pudieron consultar las partidas.", "confirmHint": "La importación se guardará como una operación única; si falla, no quedarán partidas parciales.", "confirm": "Confirmar importación", "success": "La matriz se importó correctamente.", "readError": "No se pudo leer el archivo Excel.", "importError": "No se pudo importar la matriz."
+  },
   "compare": {
     "title": "Comparador de Matrices",
     "subtitle": "Análisis comparativo de ofertas económicas por ítem y proveedor",
@@ -77,6 +83,17 @@
   "settings": {
     "title": "Configuración",
     "subtitle": "Preferencias de la aplicación, idioma y base de datos local",
+    "appearance": {
+      "title": "Tema y Apariencia",
+      "description": "Personaliza el aspecto visual de la aplicación",
+      "light": "Modo Claro",
+      "lightDesc": "Fondo claro optimizado para trabajo diurno",
+      "dark": "Modo Oscuro",
+      "darkDesc": "Agradable a la vista con contraste suave",
+      "system": "Automático (Sistema)",
+      "systemDesc": "Sincronizado con la preferencia del sistema operativo",
+      "changedNotification": "Tema actualizado correctamente"
+    },
     "language": {
       "title": "Idioma de la Interfaz",
       "description": "Selecciona el idioma predeterminado de la aplicación",

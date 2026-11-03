@@ -1,9 +1,14 @@
 {
   "appId": "com.cotizfy.app",
   "productName": "Cotizfy",
+  "copyright": "Copyright © 2026 Cotizfy",
   "directories": {
     "output": "release"
   },
+  "asar": true,
+  "asarUnpack": [
+    "**/*.node"
+  ],
   "files": [
     "dist/**/*",
     "dist-electron/**/*",
@@ -21,6 +26,10 @@
     {
       "from": "prisma/schema.prisma",
       "to": "prisma/schema.prisma"
+    },
+    {
+      "from": "prisma/migrations",
+      "to": "prisma/migrations"
     }
   ],
   "win": {

@@ -10,6 +10,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "projects": "Projects",
+    "suppliers": "Suppliers",
     "compare": "Compare Matrices",
     "settings": "Settings"
   },
@@ -37,6 +38,7 @@
   "projects": {
     "title": "Project Management",
     "subtitle": "Manage quotation projects and price matrices",
+    "editModalTitle": "Edit project",
     "createButton": "New Project",
     "searchPlaceholder": "Search projects by name or client...",
     "table": {
@@ -63,6 +65,10 @@
       "success": "Project created successfully"
     }
   },
+  "suppliers": { "title": "Suppliers", "subtitle": "Manage your supplier directory and the projects they participate in.", "name": "Supplier name", "contact": "Contact person", "email": "Email", "phone": "Phone", "add": "Add", "newInline": "New supplier", "empty": "No suppliers registered yet.", "noProjects": "No projects", "deleteConfirm": "Delete supplier {{name}}? Its associated quotes will also be deleted." },
+  "excel": {
+    "title": "Import Excel matrix", "project": "Project", "choose": "Choose Excel file", "preview": "Import preview", "rowsDetected": "{{count}} budget items detected", "needSuppliers": "This project has {{count}} associated suppliers. Two are needed to assign groups _1 and _2.", "manageSuppliers": "Manage project suppliers", "groupSupplier": "Supplier for group _{{group}}", "selectSupplier": "Select a supplier", "errors": "Errors ({{count}})", "warnings": "Warnings ({{count}})", "description": "Description", "quantity": "Quantity", "unit": "Unit", "supplier": "Supplier", "unitPrice": "Unit price", "totalPrice": "Total price", "projectItems": "Project budget items and quotes", "noItems": "This project has no budget items yet.", "noQuotes": "No quote", "queryError": "Could not load the project items.", "confirmHint": "The import is saved as one transaction; a failure will not leave partial items.", "confirm": "Confirm import", "success": "The matrix was imported successfully.", "readError": "Could not read the Excel file.", "importError": "Could not import the matrix."
+  },
   "compare": {
     "title": "Matrix Comparison",
     "subtitle": "Comparative economic analysis per item and supplier",
@@ -77,6 +83,17 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Application preferences, language, and local SQLite database",
+    "appearance": {
+      "title": "Theme & Appearance",
+      "description": "Customize the visual appearance of the application",
+      "light": "Light Mode",
+      "lightDesc": "Clean light background optimized for daytime focus",
+      "dark": "Dark Mode",
+      "darkDesc": "Easy on the eyes with gentle contrast",
+      "system": "Automatic (System)",
+      "systemDesc": "Synchronized with your operating system preference",
+      "changedNotification": "Theme updated successfully"
+    },
     "language": {
       "title": "Interface Language",
       "description": "Select the default language for the application",

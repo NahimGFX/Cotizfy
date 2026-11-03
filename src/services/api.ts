@@ -1,13 +1,24 @@
-import type { ElectronAPI, IpcResponse, ProjectSummary } from '../../electron/preload/types';
+import type { ElectronAPI, IpcResponse, ProjectSummary, ThemeMode } from '../../electron/preload/types';
 
 // Fallback in case of pure browser dev without Electron
 const dummyApi: ElectronAPI = {
   getAppVersion: async () => '1.0.0-web',
   getAppLanguage: async () => 'es',
   setAppLanguage: async () => true,
+  getAppTheme: async () => 'system',
+  setAppTheme: async () => true,
   checkDbConnection: async () => ({ connected: true, message: 'Browser memory mode' }),
   getProjects: async () => ({ success: true, data: [] }),
+  getSuppliers: async () => ({ success: true, data: [] }),
+  saveSupplier: async (data) => ({ success: true, data: { id: data.id || 'mock-supplier', name: data.name, contact: data.contact || null, email: data.email || null, phone: data.phone || null, color: data.color || null, projects: [] } }),
+  deleteSupplier: async () => ({ success: true, data: true }),
+  setProjectSuppliers: async () => ({ success: true, data: true }),
+  getProjectSuppliers: async () => ({ success: true, data: [] }),
+  selectExcelMatrix: async () => ({ success: true, data: null }),
+  importExcelMatrix: async (_projectId, rows) => ({ success: true, data: { importedCount: rows.length } }),
+  getProjectItems: async () => ({ success: true, data: [] }),
   createProject: async (data) => ({ success: true, data: { id: 'mock-1', name: data.name } }),
+  updateProject: async (id, data) => ({ success: true, data: { id, name: data.name } }),
   minimizeWindow: () => {},
   maximizeWindow: () => {},
   closeWindow: () => {},
@@ -42,6 +53,7 @@ export async function createNewProject(data: {
   description?: string;
   client?: string;
   currency?: string;
+  supplierIds?: string[];
 }): Promise<IpcResponse<{ id: string; name: string }>> {
   try {
     return await api.createProject(data);
@@ -50,5 +62,21 @@ export async function createNewProject(data: {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create project',
     };
+  }
+}
+
+export async function getStoredTheme(): Promise<ThemeMode> {
+  try {
+    return await api.getAppTheme();
+  } catch {
+    return 'system';
+  }
+}
+
+export async function persistTheme(theme: ThemeMode): Promise<boolean> {
+  try {
+    return await api.setAppTheme(theme);
+  } catch {
+    return false;
   }
 }

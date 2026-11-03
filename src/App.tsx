@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ComparePage } from './pages/ComparePage';
 import { SettingsPage } from './pages/SettingsPage';
+import { SuppliersPage } from './pages/SuppliersPage';
 import { CreateProjectModal } from './components/projects/CreateProjectModal';
 import { fetchProjects } from './services/api';
 import type { ProjectSummary } from '../electron/preload/types';
@@ -14,6 +15,8 @@ export const App: React.FC = () => {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
   const loadProjects = async () => {
     setLoadingProjects(true);
@@ -43,7 +46,7 @@ export const App: React.FC = () => {
           {currentTab === 'dashboard' && (
             <DashboardPage
               onNavigate={setCurrentTab}
-              onOpenNewProjectModal={() => setIsCreateModalOpen(true)}
+              onOpenNewProjectModal={() => { setEditingProject(null); setIsCreateModalOpen(true); }}
             />
           )}
 
@@ -51,16 +54,22 @@ export const App: React.FC = () => {
             <ProjectsPage
               projects={projects}
               loading={loadingProjects}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
-              onSelectProject={(_id) => {
+              onOpenCreateModal={() => { setEditingProject(null); setIsCreateModalOpen(true); }}
+              onEditProject={(project) => { setEditingProject(project); setIsCreateModalOpen(true); }}
+              onSelectProject={(id) => {
+                setActiveProjectId(id);
                 setCurrentTab('compare');
               }}
             />
           )}
+          {currentTab === 'suppliers' && <SuppliersPage />}
 
           {currentTab === 'compare' && (
             <ComparePage
               projects={projects}
+              activeProjectId={activeProjectId}
+              onManageSuppliers={(project) => { setEditingProject(project); setIsCreateModalOpen(true); }}
+              onImportComplete={loadProjects}
               onNavigateToProjects={() => setCurrentTab('projects')}
             />
           )}
@@ -72,9 +81,11 @@ export const App: React.FC = () => {
       {/* Modal for creating projects */}
       <CreateProjectModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => { setIsCreateModalOpen(false); setEditingProject(null); }}
+        editingProject={editingProject}
         onSuccess={() => {
           loadProjects();
+          setEditingProject(null);
         }}
       />
     </div>
