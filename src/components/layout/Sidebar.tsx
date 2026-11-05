@@ -1,28 +1,31 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   FolderKanban,
   Users,
   GitCompareArrows,
   Settings,
-  Scale
-} from 'lucide-react';
+  Scale,
+} from "lucide-react";
 
 interface SidebarProps {
   currentTab: string;
   onTabChange: (tab: string) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentTab,
+  onTabChange,
+}) => {
   const { t } = useTranslation();
 
   const navItems = [
-    { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { id: 'projects', label: t('nav.projects'), icon: FolderKanban },
-    { id: 'suppliers', label: t('nav.suppliers'), icon: Users },
-    { id: 'compare', label: t('nav.compare'), icon: GitCompareArrows },
-    { id: 'settings', label: t('nav.settings'), icon: Settings },
+    { id: "dashboard", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { id: "projects", label: t("nav.projects"), icon: FolderKanban },
+    { id: "suppliers", label: t("nav.suppliers"), icon: Users },
+    { id: "compare", label: t("nav.compare"), icon: GitCompareArrows },
+    { id: "settings", label: t("nav.settings"), icon: Settings },
   ];
 
   return (
@@ -53,11 +56,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange }) => 
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-teal-500/15 text-teal-400 border border-teal-500/30'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 dark:hover:bg-slate-900/60'
+                  ? "bg-teal-500/15 text-teal-400 border border-teal-500/30"
+                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 dark:hover:bg-slate-900/60"
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
+              <Icon
+                className={`w-4 h-4 ${isActive ? "text-teal-400" : "text-slate-400"}`}
+              />
               <span>{item.label}</span>
             </button>
           );

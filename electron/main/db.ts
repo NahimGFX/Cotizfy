@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-import { app } from 'electron';
-import path from 'path';
-import fs from 'fs';
-import crypto from 'crypto';
+import { PrismaClient } from "@prisma/client";
+import { app } from "electron";
+import path from "path";
+import fs from "fs";
+import crypto from "crypto";
 
 let prisma: PrismaClient | null = null;
 
@@ -13,26 +13,26 @@ export function getDatabasePath(): string {
     return isolatedPath;
   }
   if (app.isPackaged) {
-    const userDataPath = app.getPath('userData');
+    const userDataPath = app.getPath("userData");
     if (!fs.existsSync(userDataPath)) {
       fs.mkdirSync(userDataPath, { recursive: true });
     }
-    return path.join(userDataPath, 'cotizfy.db');
+    return path.join(userDataPath, "cotizfy.db");
   }
 
   // Development database path (inside prisma folder)
-  const devDir = path.resolve(process.cwd(), 'prisma');
+  const devDir = path.resolve(process.cwd(), "prisma");
   if (!fs.existsSync(devDir)) {
     fs.mkdirSync(devDir, { recursive: true });
   }
-  return path.join(devDir, 'dev.db');
+  return path.join(devDir, "dev.db");
 }
 
 export function getMigrationsPath(): string {
   if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'prisma', 'migrations');
+    return path.join(process.resourcesPath, "prisma", "migrations");
   }
-  return path.resolve(process.cwd(), 'prisma', 'migrations');
+  return path.resolve(process.cwd(), "prisma", "migrations");
 }
 
 /**
@@ -56,7 +56,9 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
 
   const migrationsDir = getMigrationsPath();
   if (!fs.existsSync(migrationsDir)) {
-    console.warn(`[Prisma Migrate] Migrations directory not found at: ${migrationsDir}`);
+    console.warn(
+      `[Prisma Migrate] Migrations directory not found at: ${migrationsDir}`,
+    );
     return;
   }
 
@@ -68,13 +70,13 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
     .sort();
 
   for (const folderName of migrationFolders) {
-    const migrationFile = path.join(migrationsDir, folderName, 'migration.sql');
+    const migrationFile = path.join(migrationsDir, folderName, "migration.sql");
     if (!fs.existsSync(migrationFile)) continue;
 
     // Check if migration has already been applied
     const applied = await client.$queryRawUnsafe<Array<{ id: string }>>(
       `SELECT id FROM "_prisma_migrations" WHERE "migration_name" = ? AND "finished_at" IS NOT NULL AND "rolled_back_at" IS NULL LIMIT 1;`,
-      folderName
+      folderName,
     );
 
     if (applied && applied.length > 0) {
@@ -82,8 +84,11 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
     }
 
     console.log(`[Prisma Migrate] Applying pending migration: ${folderName}`);
-    const sqlContent = fs.readFileSync(migrationFile, 'utf-8');
-    const checksum = crypto.createHash('sha256').update(fs.readFileSync(migrationFile)).digest('hex');
+    const sqlContent = fs.readFileSync(migrationFile, "utf-8");
+    const checksum = crypto
+      .createHash("sha256")
+      .update(fs.readFileSync(migrationFile))
+      .digest("hex");
     const migrationId = crypto.randomUUID();
 
     // Record migration start
@@ -91,14 +96,14 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
       `INSERT INTO "_prisma_migrations" ("id", "checksum", "migration_name", "started_at") VALUES (?, ?, ?, CURRENT_TIMESTAMP);`,
       migrationId,
       checksum,
-      folderName
+      folderName,
     );
 
     try {
       // Split SQL script into individual executable statements
       const statements = sqlContent
-        .replace(/--.*$/gm, '') // Remove single-line comments
-        .split(';')
+        .replace(/--.*$/gm, "") // Remove single-line comments
+        .split(";")
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
 
@@ -109,16 +114,21 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
       // Mark migration as finished
       await client.$executeRawUnsafe(
         `UPDATE "_prisma_migrations" SET "finished_at" = CURRENT_TIMESTAMP, "applied_steps_count" = 1 WHERE "id" = ?;`,
-        migrationId
+        migrationId,
       );
-      console.log(`[Prisma Migrate] Migration ${folderName} applied successfully.`);
+      console.log(
+        `[Prisma Migrate] Migration ${folderName} applied successfully.`,
+      );
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error(`[Prisma Migrate] Error executing migration ${folderName}:`, errorMsg);
+      console.error(
+        `[Prisma Migrate] Error executing migration ${folderName}:`,
+        errorMsg,
+      );
       await client.$executeRawUnsafe(
         `UPDATE "_prisma_migrations" SET "logs" = ?, "rolled_back_at" = CURRENT_TIMESTAMP WHERE "id" = ?;`,
         errorMsg,
-        migrationId
+        migrationId,
       );
       throw err;
     }
@@ -136,14 +146,18 @@ export function getPrismaClient(): PrismaClient {
           url: dbUrl,
         },
       },
-      log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+      log:
+        process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
     });
   }
 
   return prisma;
 }
 
-export async function initDatabase(): Promise<{ success: boolean; message: string }> {
+export async function initDatabase(): Promise<{
+  success: boolean;
+  message: string;
+}> {
   try {
     const client = getPrismaClient();
 
@@ -153,10 +167,13 @@ export async function initDatabase(): Promise<{ success: boolean; message: strin
     // 2. Test connectivity
     await client.$queryRaw`SELECT 1;`;
 
-    return { success: true, message: 'Database initialized and migrated successfully' };
+    return {
+      success: true,
+      message: "Database initialized and migrated successfully",
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error('[Cotizfy] Database initialization failed:', message);
+    console.error("[Cotizfy] Database initialization failed:", message);
     return { success: false, message };
   }
 }

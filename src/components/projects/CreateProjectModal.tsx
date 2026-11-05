@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
-import { X, FolderPlus, Plus } from 'lucide-react';
-import { api, createNewProject } from '../../services/api';
-import type { SupplierRecord } from '../../../electron/preload/types';
-import type { ProjectSummary } from '../../../electron/preload/types';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { X, FolderPlus, Plus } from "lucide-react";
+import { api, createNewProject } from "../../services/api";
+import type { SupplierRecord } from "../../../electron/preload/types";
+import type { ProjectSummary } from "../../../electron/preload/types";
 
 const projectSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   client: z.string().optional(),
-  currency: z.string().min(1, 'La moneda es requerida'),
+  currency: z.string().min(1, "La moneda es requerida"),
   description: z.string().optional(),
 });
 
@@ -27,19 +27,36 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   editingProject = null,
 }) => {
   const { t } = useTranslation();
-  const [name, setName] = useState('');
-  const [client, setClient] = useState('');
-  const [currency, setCurrency] = useState('USD');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [client, setClient] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [supplierIds, setSupplierIds] = useState<string[]>([]);
-  const [newSupplierName, setNewSupplierName] = useState('');
-  const [supplierError, setSupplierError] = useState('');
+  const [newSupplierName, setNewSupplierName] = useState("");
+  const [supplierError, setSupplierError] = useState("");
 
-  useEffect(() => { if (isOpen) void api.getSuppliers().then(r => { if (r.success && r.data) setSuppliers(r.data); }); }, [isOpen]);
-  useEffect(() => { if (!isOpen) return; setName(editingProject?.name || ''); setClient(editingProject?.client || ''); setCurrency(editingProject?.currency || 'USD'); setDescription(editingProject?.description || ''); setSupplierError(''); if (editingProject) void api.getProjectSuppliers(editingProject.id).then(r => { if (r.success && r.data) setSupplierIds(r.data.map(s => s.id)); }); else setSupplierIds([]); }, [isOpen, editingProject]);
+  useEffect(() => {
+    if (isOpen)
+      void api.getSuppliers().then((r) => {
+        if (r.success && r.data) setSuppliers(r.data);
+      });
+  }, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) return;
+    setName(editingProject?.name || "");
+    setClient(editingProject?.client || "");
+    setCurrency(editingProject?.currency || "USD");
+    setDescription(editingProject?.description || "");
+    setSupplierError("");
+    if (editingProject)
+      void api.getProjectSuppliers(editingProject.id).then((r) => {
+        if (r.success && r.data) setSupplierIds(r.data.map((s) => s.id));
+      });
+    else setSupplierIds([]);
+  }, [isOpen, editingProject]);
 
   if (!isOpen) return null;
 
@@ -48,25 +65,35 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setError(null);
 
     // Validate using Zod
-    const validation = projectSchema.safeParse({ name, client, currency, description });
+    const validation = projectSchema.safeParse({
+      name,
+      client,
+      currency,
+      description,
+    });
     if (!validation.success) {
-      setError(validation.error.errors[0]?.message || 'Datos inválidos');
+      setError(validation.error.errors[0]?.message || "Datos inválidos");
       return;
     }
 
     setLoading(true);
-    const result = editingProject ? await api.updateProject(editingProject.id, { ...validation.data, supplierIds }) : await createNewProject({ ...validation.data, supplierIds });
+    const result = editingProject
+      ? await api.updateProject(editingProject.id, {
+          ...validation.data,
+          supplierIds,
+        })
+      : await createNewProject({ ...validation.data, supplierIds });
     setLoading(false);
 
     if (result.success) {
-      setName('');
-      setClient('');
-      setDescription('');
+      setName("");
+      setClient("");
+      setDescription("");
       setSupplierIds([]);
       onSuccess();
       onClose();
     } else {
-      setError(result.error || 'Error al crear el proyecto');
+      setError(result.error || "Error al crear el proyecto");
     }
   };
 
@@ -80,7 +107,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <FolderPlus className="w-4 h-4" />
             </div>
             <h3 className="font-semibold text-slate-800 text-base">
-              {editingProject ? t('projects.editModalTitle') : t('projects.createModal.title')}
+              {editingProject
+                ? t("projects.editModalTitle")
+                : t("projects.createModal.title")}
             </h3>
           </div>
           <button
@@ -92,7 +121,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 space-y-4 max-h-[85vh] overflow-y-auto"
+        >
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
               {error}
@@ -101,14 +133,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              {t('projects.createModal.nameLabel')} *
+              {t("projects.createModal.nameLabel")} *
             </label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t('projects.createModal.namePlaceholder')}
+              placeholder={t("projects.createModal.namePlaceholder")}
               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
             />
           </div>
@@ -116,20 +148,20 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {t('projects.createModal.clientLabel')}
+                {t("projects.createModal.clientLabel")}
               </label>
               <input
                 type="text"
                 value={client}
                 onChange={(e) => setClient(e.target.value)}
-                placeholder={t('projects.createModal.clientPlaceholder')}
+                placeholder={t("projects.createModal.clientPlaceholder")}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {t('projects.createModal.currencyLabel')}
+                {t("projects.createModal.currencyLabel")}
               </label>
               <select
                 value={currency}
@@ -147,24 +179,76 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300">{t('suppliers.title')}</label>
+            <label className="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              {t("suppliers.title")}
+            </label>
             <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700 p-2">
-              {suppliers.map(s => <label key={s.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"><input type="checkbox" checked={supplierIds.includes(s.id)} onChange={e => setSupplierIds(ids => e.target.checked ? [...ids, s.id] : ids.filter(id => id !== s.id))}/>{s.name}</label>)}
-              {!suppliers.length && <p className="px-2 py-1 text-xs text-slate-500">{t('suppliers.empty')}</p>}
+              {suppliers.map((s) => (
+                <label
+                  key={s.id}
+                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                >
+                  <input
+                    type="checkbox"
+                    checked={supplierIds.includes(s.id)}
+                    onChange={(e) =>
+                      setSupplierIds((ids) =>
+                        e.target.checked
+                          ? [...ids, s.id]
+                          : ids.filter((id) => id !== s.id),
+                      )
+                    }
+                  />
+                  {s.name}
+                </label>
+              ))}
+              {!suppliers.length && (
+                <p className="px-2 py-1 text-xs text-slate-500">
+                  {t("suppliers.empty")}
+                </p>
+              )}
             </div>
-            <div className="mt-2 flex gap-2"><input value={newSupplierName} onChange={e=>setNewSupplierName(e.target.value)} placeholder={t('suppliers.newInline')} className="min-w-0 flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"/><button type="button" className="inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-700 px-3 text-sm" onClick={async()=>{const r=await api.saveSupplier({name:newSupplierName}); if(!r.success || !r.data){setSupplierError(r.error || t('common.error'));return;} const all=await api.getSuppliers(); if(all.success && all.data)setSuppliers(all.data); setSupplierIds(ids=>[...ids,r.data!.id]); setNewSupplierName(''); setSupplierError('');}}><Plus className="h-4 w-4"/>{t('suppliers.add')}</button></div>
-            {supplierError && <p className="mt-1 text-xs text-red-600">{supplierError}</p>}
+            <div className="mt-2 flex gap-2">
+              <input
+                value={newSupplierName}
+                onChange={(e) => setNewSupplierName(e.target.value)}
+                placeholder={t("suppliers.newInline")}
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-700 px-3 text-sm"
+                onClick={async () => {
+                  const r = await api.saveSupplier({ name: newSupplierName });
+                  if (!r.success || !r.data) {
+                    setSupplierError(r.error || t("common.error"));
+                    return;
+                  }
+                  const all = await api.getSuppliers();
+                  if (all.success && all.data) setSuppliers(all.data);
+                  setSupplierIds((ids) => [...ids, r.data!.id]);
+                  setNewSupplierName("");
+                  setSupplierError("");
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                {t("suppliers.add")}
+              </button>
+            </div>
+            {supplierError && (
+              <p className="mt-1 text-xs text-red-600">{supplierError}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              {t('projects.createModal.descriptionLabel')}
+              {t("projects.createModal.descriptionLabel")}
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('projects.createModal.descriptionPlaceholder')}
+              placeholder={t("projects.createModal.descriptionPlaceholder")}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none"
             />
           </div>
@@ -175,14 +259,18 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              {t('projects.createModal.cancel')}
+              {t("projects.createModal.cancel")}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
             >
-              {loading ? t('common.loading') : editingProject ? t('common.save') : t('projects.createModal.submit')}
+              {loading
+                ? t("common.loading")
+                : editingProject
+                  ? t("common.save")
+                  : t("projects.createModal.submit")}
             </button>
           </div>
         </form>

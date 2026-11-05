@@ -1,5 +1,5 @@
-import type { PrismaClient } from '@prisma/client';
-import type { ImportedBudgetRow } from './excel';
+import type { PrismaClient } from "@prisma/client";
+import type { ImportedBudgetRow } from "./excel";
 
 export async function importExcelRows(
   prisma: PrismaClient,
@@ -8,10 +8,18 @@ export async function importExcelRows(
   supplierIds: [string, string],
 ): Promise<number> {
   if (!Array.isArray(rows) || rows.length === 0 || rows.length > 10000) {
-    throw new Error('The import must contain between 1 and 10,000 rows.');
+    throw new Error("The import must contain between 1 and 10,000 rows.");
   }
-  if (!Array.isArray(supplierIds) || supplierIds.length !== 2 || !supplierIds[0] || !supplierIds[1] || supplierIds[0] === supplierIds[1]) {
-    throw new Error('Assign two different project suppliers to the price groups.');
+  if (
+    !Array.isArray(supplierIds) ||
+    supplierIds.length !== 2 ||
+    !supplierIds[0] ||
+    !supplierIds[1] ||
+    supplierIds[0] === supplierIds[1]
+  ) {
+    throw new Error(
+      "Assign two different project suppliers to the price groups.",
+    );
   }
 
   await prisma.$transaction(async (tx) => {
@@ -19,11 +27,24 @@ export async function importExcelRows(
       where: { projectId, supplierId: { in: supplierIds } },
       select: { supplierId: true },
     });
-    if (allowed.length !== 2) throw new Error('Both suppliers must be associated with this project.');
+    if (allowed.length !== 2)
+      throw new Error("Both suppliers must be associated with this project.");
     const startOrder = await tx.budgetItem.count({ where: { projectId } });
     for (const [offset, row] of rows.entries()) {
-      if (!row || typeof row.itemNumber !== 'string' || !row.itemNumber.trim() || typeof row.description !== 'string' || typeof row.unit !== 'string' || !Number.isFinite(row.quantity) || row.quantity < 0 || !Array.isArray(row.quotes) || row.quotes.length !== 2) {
-        throw new Error(`Invalid budget row at spreadsheet row ${row?.rowNumber ?? offset + 1}.`);
+      if (
+        !row ||
+        typeof row.itemNumber !== "string" ||
+        !row.itemNumber.trim() ||
+        typeof row.description !== "string" ||
+        typeof row.unit !== "string" ||
+        !Number.isFinite(row.quantity) ||
+        row.quantity < 0 ||
+        !Array.isArray(row.quotes) ||
+        row.quotes.length !== 2
+      ) {
+        throw new Error(
+          `Invalid budget row at spreadsheet row ${row?.rowNumber ?? offset + 1}.`,
+        );
       }
       const item = await tx.budgetItem.create({
         data: {
@@ -37,11 +58,22 @@ export async function importExcelRows(
       });
 
       for (const [group, quote] of row.quotes.entries()) {
-        if (!quote || (quote.unitPrice !== null && (!Number.isFinite(quote.unitPrice) || quote.unitPrice < 0)) || (quote.totalPrice !== null && (!Number.isFinite(quote.totalPrice) || quote.totalPrice < 0))) {
+        if (
+          !quote ||
+          (quote.unitPrice !== null &&
+            (!Number.isFinite(quote.unitPrice) || quote.unitPrice < 0)) ||
+          (quote.totalPrice !== null &&
+            (!Number.isFinite(quote.totalPrice) || quote.totalPrice < 0))
+        ) {
           throw new Error(`Invalid quote at spreadsheet row ${row.rowNumber}.`);
         }
         if (quote.unitPrice === null && quote.totalPrice === null) continue;
-        const missing = [quote.unitPrice === null ? 'unit price' : '', quote.totalPrice === null ? 'total price' : ''].filter(Boolean).join(' and ');
+        const missing = [
+          quote.unitPrice === null ? "unit price" : "",
+          quote.totalPrice === null ? "total price" : "",
+        ]
+          .filter(Boolean)
+          .join(" and ");
         await tx.itemQuote.create({
           data: {
             itemId: item.id,

@@ -4,7 +4,7 @@ export interface IpcResponse<T = unknown> {
   error?: string;
 }
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = "light" | "dark" | "system";
 
 export interface ProjectSummary {
   id: string;
@@ -19,12 +19,53 @@ export interface ProjectSummary {
   itemsCount: number;
 }
 
-export interface SupplierRecord { id: string; name: string; contact: string | null; email: string | null; phone: string | null; color: string | null; projects: { id: string; name: string }[] }
-export interface ExcelQuotePreview { unitPrice: number | null; totalPrice: number | null }
-export interface ExcelRowPreview { itemNumber: string; description: string; quantity: number; unit: string; quotes: [ExcelQuotePreview, ExcelQuotePreview]; rowNumber: number }
-export interface ExcelMatrixPreview { rows: ExcelRowPreview[]; errors: string[]; warnings: string[]; groups: [string, string] }
-export interface ExcelSelection { fileName: string; preview: ExcelMatrixPreview; suppliers: { id: string; name: string }[] }
-export interface ProjectBudgetItem { id: string; itemNumber: string; description: string; quantity: number; unit: string; quotes: { id: string; supplierId: string; supplierName: string; unitPrice: number; totalPrice: number; notes: string | null }[] }
+export interface SupplierRecord {
+  id: string;
+  name: string;
+  contact: string | null;
+  email: string | null;
+  phone: string | null;
+  color: string | null;
+  projects: { id: string; name: string }[];
+}
+export interface ExcelQuotePreview {
+  unitPrice: number | null;
+  totalPrice: number | null;
+}
+export interface ExcelRowPreview {
+  itemNumber: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  quotes: [ExcelQuotePreview, ExcelQuotePreview];
+  rowNumber: number;
+}
+export interface ExcelMatrixPreview {
+  rows: ExcelRowPreview[];
+  errors: string[];
+  warnings: string[];
+  groups: [string, string];
+}
+export interface ExcelSelection {
+  fileName: string;
+  preview: ExcelMatrixPreview;
+  suppliers: { id: string; name: string }[];
+}
+export interface ProjectBudgetItem {
+  id: string;
+  itemNumber: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  quotes: {
+    id: string;
+    supplierId: string;
+    supplierName: string;
+    unitPrice: number;
+    totalPrice: number;
+    notes: string | null;
+  }[];
+}
 
 export interface ElectronAPI {
   // App & System info
@@ -41,16 +82,52 @@ export interface ElectronAPI {
 
   // Projects IPC
   getProjects: () => Promise<IpcResponse<ProjectSummary[]>>;
-  createProject: (data: { name: string; description?: string; client?: string; currency?: string; supplierIds?: string[] }) => Promise<IpcResponse<{ id: string; name: string }>>;
-  updateProject: (id: string, data: { name: string; description?: string; client?: string; currency?: string; supplierIds?: string[] }) => Promise<IpcResponse<{ id: string; name: string }>>;
+  createProject: (data: {
+    name: string;
+    description?: string;
+    client?: string;
+    currency?: string;
+    supplierIds?: string[];
+  }) => Promise<IpcResponse<{ id: string; name: string }>>;
+  updateProject: (
+    id: string,
+    data: {
+      name: string;
+      description?: string;
+      client?: string;
+      currency?: string;
+      supplierIds?: string[];
+    },
+  ) => Promise<IpcResponse<{ id: string; name: string }>>;
   getSuppliers: () => Promise<IpcResponse<SupplierRecord[]>>;
-  saveSupplier: (data: { id?: string; name: string; contact?: string; email?: string; phone?: string; color?: string }) => Promise<IpcResponse<SupplierRecord>>;
+  saveSupplier: (data: {
+    id?: string;
+    name: string;
+    contact?: string;
+    email?: string;
+    phone?: string;
+    color?: string;
+  }) => Promise<IpcResponse<SupplierRecord>>;
   deleteSupplier: (id: string) => Promise<IpcResponse<boolean>>;
-  setProjectSuppliers: (projectId: string, supplierIds: string[]) => Promise<IpcResponse<boolean>>;
-  getProjectSuppliers: (projectId: string) => Promise<IpcResponse<SupplierRecord[]>>;
-  selectExcelMatrix: (projectId: string, language: 'es' | 'en') => Promise<IpcResponse<ExcelSelection | null>>;
-  importExcelMatrix: (projectId: string, rows: ExcelRowPreview[], supplierIds: [string, string]) => Promise<IpcResponse<{ importedCount: number }>>;
-  getProjectItems: (projectId: string) => Promise<IpcResponse<ProjectBudgetItem[]>>;
+  setProjectSuppliers: (
+    projectId: string,
+    supplierIds: string[],
+  ) => Promise<IpcResponse<boolean>>;
+  getProjectSuppliers: (
+    projectId: string,
+  ) => Promise<IpcResponse<SupplierRecord[]>>;
+  selectExcelMatrix: (
+    projectId: string,
+    language: "es" | "en",
+  ) => Promise<IpcResponse<ExcelSelection | null>>;
+  importExcelMatrix: (
+    projectId: string,
+    rows: ExcelRowPreview[],
+    supplierIds: [string, string],
+  ) => Promise<IpcResponse<{ importedCount: number }>>;
+  getProjectItems: (
+    projectId: string,
+  ) => Promise<IpcResponse<ProjectBudgetItem[]>>;
 
   // Window controls
   minimizeWindow: () => void;

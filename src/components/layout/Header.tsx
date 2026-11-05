@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Database, ShieldCheck, Sun, Moon, Laptop } from 'lucide-react';
-import { LanguageSelector } from '../common/LanguageSelector';
-import { checkDatabase, api } from '../../services/api';
-import { useTheme } from '../../context/ThemeContext';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Database, ShieldCheck, Sun, Moon, Laptop } from "lucide-react";
+import { LanguageSelector } from "../common/LanguageSelector";
+import { checkDatabase, api } from "../../services/api";
+import { useTheme } from "../../context/ThemeContext";
 
 interface HeaderProps {
   currentTab: string;
@@ -13,7 +13,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab }) => {
   const { t } = useTranslation();
   const { theme, effectiveTheme, setTheme } = useTheme();
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-  const [appVersion, setAppVersion] = useState<string>('1.0.0');
+  const [appVersion, setAppVersion] = useState<string>("1.0.0");
 
   useEffect(() => {
     checkDatabase().then((res) => {
@@ -26,9 +26,9 @@ export const Header: React.FC<HeaderProps> = ({ currentTab }) => {
   }, []);
 
   const cycleTheme = () => {
-    if (theme === 'system') setTheme('light');
-    else if (theme === 'light') setTheme('dark');
-    else setTheme('system');
+    if (theme === "system") setTheme("light");
+    else if (theme === "light") setTheme("dark");
+    else setTheme("system");
   };
 
   return (
@@ -50,26 +50,28 @@ export const Header: React.FC<HeaderProps> = ({ currentTab }) => {
           className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium"
           title={`Tema: ${theme} (Efectivo: ${effectiveTheme})`}
         >
-          {theme === 'light' && <Sun className="w-3.5 h-3.5 text-amber-500" />}
-          {theme === 'dark' && <Moon className="w-3.5 h-3.5 text-indigo-400" />}
-          {theme === 'system' && <Laptop className="w-3.5 h-3.5 text-teal-500" />}
+          {theme === "light" && <Sun className="w-3.5 h-3.5 text-amber-500" />}
+          {theme === "dark" && <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+          {theme === "system" && (
+            <Laptop className="w-3.5 h-3.5 text-teal-500" />
+          )}
           <span className="capitalize">{theme}</span>
         </button>
 
         {/* Database Status indicator */}
         <div
           className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
-          title={dbConnected ? t('app.connected') : t('app.disconnected')}
+          title={dbConnected ? t("app.connected") : t("app.disconnected")}
         >
           <Database className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
           <span className="text-slate-600 dark:text-slate-300">SQLite</span>
           <span
             className={`w-2 h-2 rounded-full ${
               dbConnected === true
-                ? 'bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900'
+                ? "bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900"
                 : dbConnected === false
-                ? 'bg-red-500 ring-2 ring-red-200 dark:ring-red-900'
-                : 'bg-amber-400'
+                  ? "bg-red-500 ring-2 ring-red-200 dark:ring-red-900"
+                  : "bg-amber-400"
             }`}
           />
         </div>

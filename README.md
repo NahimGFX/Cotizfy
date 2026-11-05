@@ -8,11 +8,11 @@ Cotizfy es una aplicación de escritorio local para Windows que permite administ
 
 Todavía no hay capturas de pantalla versionadas en el repositorio. Se pueden agregar aquí cuando estén disponibles:
 
-| Pantalla | Captura |
-| --- | --- |
-| Dashboard | Pendiente |
-| Comparación de matrices | Pendiente |
-| Importación y vista previa | Pendiente |
+| Pantalla                           | Captura   |
+| ---------------------------------- | --------- |
+| Dashboard                          | Pendiente |
+| Comparación de matrices            | Pendiente |
+| Importación y vista previa         | Pendiente |
 | Gestión de proyectos y proveedores | Pendiente |
 
 ## Características principales
@@ -48,22 +48,22 @@ Todavía no hay capturas de pantalla versionadas en el repositorio. Se pueden ag
 
 Las dependencias y versiones indicadas proceden de `package.json` (rangos semver):
 
-| Tecnología | Uso | Dependencia declarada |
-| --- | --- | --- |
-| React 18 | Interfaz de usuario | `react` `^18.3.1`, `react-dom` `^18.3.1` |
-| TypeScript | Tipado y compilación | `typescript` `^5.6.3` |
-| Vite | Servidor y compilación del renderer | `vite` `^5.4.11`, `@vitejs/plugin-react` `^4.3.4` |
-| Electron | Aplicación de escritorio y procesos main/renderer | `electron` `^33.2.1` |
-| SQLite | Almacenamiento local | Proveedor `sqlite` de Prisma |
-| Prisma ORM | Cliente y modelo relacional | `prisma` `^5.22.0`, `@prisma/client` `^5.22.0` |
-| Tailwind CSS | Estilos | `tailwindcss` `^3.4.17`, `postcss`, `autoprefixer` |
-| SheetJS | Lectura y pruebas de archivos Excel | `xlsx` `^0.18.5` |
-| Recharts | Gráficos del comparador y Dashboard | `recharts` `^2.15.0` |
-| i18next | Internacionalización | `i18next` `^24.2.0`, `i18next-browser-languagedetector` `^8.0.2`, `react-i18next` `^15.4.0` |
-| Lucide React | Iconos | `lucide-react` `^0.468.0` |
-| Electron Builder | Empaquetado e instalador de Windows | `electron-builder` `^25.1.8` |
-| tsup | Compilación de main y preload | `tsup` `^8.3.5` |
-| Zod | No se utiliza actualmente | No está declarado en `package.json` |
+| Tecnología       | Uso                                               | Dependencia declarada                                                                       |
+| ---------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| React 18         | Interfaz de usuario                               | `react` `^18.3.1`, `react-dom` `^18.3.1`                                                    |
+| TypeScript       | Tipado y compilación                              | `typescript` `^5.6.3`                                                                       |
+| Vite             | Servidor y compilación del renderer               | `vite` `^5.4.11`, `@vitejs/plugin-react` `^4.3.4`                                           |
+| Electron         | Aplicación de escritorio y procesos main/renderer | `electron` `^33.2.1`                                                                        |
+| SQLite           | Almacenamiento local                              | Proveedor `sqlite` de Prisma                                                                |
+| Prisma ORM       | Cliente y modelo relacional                       | `prisma` `^5.22.0`, `@prisma/client` `^5.22.0`                                              |
+| Tailwind CSS     | Estilos                                           | `tailwindcss` `^3.4.17`, `postcss`, `autoprefixer`                                          |
+| SheetJS          | Lectura y pruebas de archivos Excel               | `xlsx` `^0.18.5`                                                                            |
+| Recharts         | Gráficos del comparador y Dashboard               | `recharts` `^2.15.0`                                                                        |
+| i18next          | Internacionalización                              | `i18next` `^24.2.0`, `i18next-browser-languagedetector` `^8.0.2`, `react-i18next` `^15.4.0` |
+| Lucide React     | Iconos                                            | `lucide-react` `^0.468.0`                                                                   |
+| Electron Builder | Empaquetado e instalador de Windows               | `electron-builder` `^25.1.8`                                                                |
+| tsup             | Compilación de main y preload                     | `tsup` `^8.3.5`                                                                             |
+| Zod              | No se utiliza actualmente                         | No está declarado en `package.json`                                                         |
 
 La validación de importaciones y operaciones CRUD está implementada con comprobaciones en TypeScript dentro del proceso principal; no se usa Zod.
 
@@ -101,14 +101,14 @@ cotizfy/
 
 ### Modelo de datos
 
-| Modelo | Responsabilidad y relaciones |
-| --- | --- |
-| `Project` | Proyecto, moneda, cliente, descripción, proveedores asociados y partidas. |
-| `Supplier` | Catálogo de proveedores y sus cotizaciones y asociaciones a proyectos. |
-| `ProjectSupplier` | Tabla intermedia muchos a muchos entre `Project` y `Supplier`; almacena el orden de asociación. |
-| `BudgetItem` | Partida perteneciente a un proyecto, con ITEM, descripción, cantidad y unidad. |
-| `ItemQuote` | Cotización de una partida por un proveedor, con precios unitario y total y notas. Tiene unicidad por `itemId` y `supplierId`. |
-| `AppSetting` | Preferencias persistidas como idioma y tema. |
+| Modelo            | Responsabilidad y relaciones                                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `Project`         | Proyecto, moneda, cliente, descripción, proveedores asociados y partidas.                                                     |
+| `Supplier`        | Catálogo de proveedores y sus cotizaciones y asociaciones a proyectos.                                                        |
+| `ProjectSupplier` | Tabla intermedia muchos a muchos entre `Project` y `Supplier`; almacena el orden de asociación.                               |
+| `BudgetItem`      | Partida perteneciente a un proyecto, con ITEM, descripción, cantidad y unidad.                                                |
+| `ItemQuote`       | Cotización de una partida por un proveedor, con precios unitario y total y notas. Tiene unicidad por `itemId` y `supplierId`. |
+| `AppSetting`      | Preferencias persistidas como idioma y tema.                                                                                  |
 
 El esquema usa reglas `onDelete: Cascade` en las relaciones de proyectos, partidas y cotizaciones. La operación de borrar un proyecto también elimina explícitamente sus cotizaciones, partidas y asociaciones dentro de una transacción. No elimina los registros `Supplier`.
 
@@ -140,12 +140,12 @@ La aplicación Electron calcula su ruta local mediante `electron/main/db.ts`; no
 
 ## Variables de entorno
 
-| Variable | Uso |
-| --- | --- |
-| `DATABASE_URL` | URL declarada por el datasource Prisma y usada por los comandos Prisma de CLI. La aplicación Electron reemplaza la URL del cliente con la ruta local resuelta por `getDatabasePath()`. |
-| `COTIZFY_DATABASE_PATH` | Ruta alternativa de SQLite en modo no empaquetado. Útil para ejecutar instancias o pruebas aisladas; no se aplica a la aplicación empaquetada. |
-| `NODE_ENV` | Distingue desarrollo/producción y configura el registro de Prisma. Los scripts de desarrollo lo establecen donde corresponde. |
-| `VITE_DEV_SERVER_URL` | URL del renderer Vite que consume Electron en desarrollo; el script `dev:electron` la establece en `http://localhost:5173`. |
+| Variable                | Uso                                                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | URL declarada por el datasource Prisma y usada por los comandos Prisma de CLI. La aplicación Electron reemplaza la URL del cliente con la ruta local resuelta por `getDatabasePath()`. |
+| `COTIZFY_DATABASE_PATH` | Ruta alternativa de SQLite en modo no empaquetado. Útil para ejecutar instancias o pruebas aisladas; no se aplica a la aplicación empaquetada.                                         |
+| `NODE_ENV`              | Distingue desarrollo/producción y configura el registro de Prisma. Los scripts de desarrollo lo establecen donde corresponde.                                                          |
+| `VITE_DEV_SERVER_URL`   | URL del renderer Vite que consume Electron en desarrollo; el script `dev:electron` la establece en `http://localhost:5173`.                                                            |
 
 No se encontró un archivo `.env.example`. `.env` y `.env.local` están excluidos por `.gitignore`.
 
@@ -153,24 +153,24 @@ No se encontró un archivo `.env.example`. `.env` y `.env.local` están excluido
 
 Scripts definidos en `package.json`:
 
-| Comando | Descripción |
-| --- | --- |
-| `npm run dev` | Arranca Vite y Electron en desarrollo; ejecuta primero `predev` (`npm run build:electron`). |
-| `npm run dev:renderer` | Inicia solamente el servidor Vite del renderer en el puerto 5173. |
-| `npm run dev:electron` | Espera el servidor Vite e inicia Electron en modo desarrollo. |
-| `npm run build` | Ejecuta `build:renderer` y `build:electron`. |
-| `npm run build:renderer` | Ejecuta `tsc --noEmit` y `vite build`; escribe el renderer en `dist/`. |
-| `npm run build:electron` | Compila main y preload con tsup en `dist-electron/`. |
-| `npm run preview:electron` | Compila la aplicación e inicia Electron usando el bundle de producción local. |
-| `npm test` | Ejecuta las pruebas Excel/SQLite, comparación y CRUD. |
-| `npm run test:excel-import` | Ejecuta parser e integración de importación con SQLite aislado. |
-| `npm run test:comparison` | Ejecuta pruebas de la lógica de comparación. |
-| `npm run test:matrix-crud` | Prueba operaciones CRUD y eliminación transaccional contra SQLite aislado. |
-| `npm run prisma:generate` | Ejecuta `prisma generate`. |
-| `npm run prisma:push` | Ejecuta `prisma db push`; no forma parte de la inicialización de producción. |
-| `npm run prisma:migrate` | Ejecuta `prisma migrate dev` para desarrollo. |
-| `npm run package:win` | Compila y crea el instalador Windows NSIS x64 en `release/`. |
-| `npm run package:dir` | Compila y empaqueta la aplicación en un directorio sin instalador. |
+| Comando                     | Descripción                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run dev`               | Arranca Vite y Electron en desarrollo; ejecuta primero `predev` (`npm run build:electron`). |
+| `npm run dev:renderer`      | Inicia solamente el servidor Vite del renderer en el puerto 5173.                           |
+| `npm run dev:electron`      | Espera el servidor Vite e inicia Electron en modo desarrollo.                               |
+| `npm run build`             | Ejecuta `build:renderer` y `build:electron`.                                                |
+| `npm run build:renderer`    | Ejecuta `tsc --noEmit` y `vite build`; escribe el renderer en `dist/`.                      |
+| `npm run build:electron`    | Compila main y preload con tsup en `dist-electron/`.                                        |
+| `npm run preview:electron`  | Compila la aplicación e inicia Electron usando el bundle de producción local.               |
+| `npm test`                  | Ejecuta las pruebas Excel/SQLite, comparación y CRUD.                                       |
+| `npm run test:excel-import` | Ejecuta parser e integración de importación con SQLite aislado.                             |
+| `npm run test:comparison`   | Ejecuta pruebas de la lógica de comparación.                                                |
+| `npm run test:matrix-crud`  | Prueba operaciones CRUD y eliminación transaccional contra SQLite aislado.                  |
+| `npm run prisma:generate`   | Ejecuta `prisma generate`.                                                                  |
+| `npm run prisma:push`       | Ejecuta `prisma db push`; no forma parte de la inicialización de producción.                |
+| `npm run prisma:migrate`    | Ejecuta `prisma migrate dev` para desarrollo.                                               |
+| `npm run package:win`       | Compila y crea el instalador Windows NSIS x64 en `release/`.                                |
+| `npm run package:dir`       | Compila y empaqueta la aplicación en un directorio sin instalador.                          |
 
 ## Ejecución en modo desarrollo
 

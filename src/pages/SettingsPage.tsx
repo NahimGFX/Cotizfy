@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Globe,
   Database,
@@ -11,16 +11,19 @@ import {
   Moon,
   Laptop,
   Palette,
-} from 'lucide-react';
-import { switchLanguage } from '../i18n';
-import { checkDatabase } from '../services/api';
-import { useTheme } from '../context/ThemeContext';
-import type { ThemeMode } from '../../electron/preload/types';
+} from "lucide-react";
+import { switchLanguage } from "../i18n";
+import { checkDatabase } from "../services/api";
+import { useTheme } from "../context/ThemeContext";
+import type { ThemeMode } from "../../electron/preload/types";
 
 export const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { theme, effectiveTheme, setTheme } = useTheme();
-  const [dbStatus, setDbStatus] = useState<{ connected: boolean; message?: string } | null>(null);
+  const [dbStatus, setDbStatus] = useState<{
+    connected: boolean;
+    message?: string;
+  } | null>(null);
   const [checking, setChecking] = useState<boolean>(false);
   const [savedLangNotice, setSavedLangNotice] = useState<boolean>(false);
   const [savedThemeNotice, setSavedThemeNotice] = useState<boolean>(false);
@@ -36,7 +39,7 @@ export const SettingsPage: React.FC = () => {
     testDb();
   }, []);
 
-  const handleLangChange = async (lng: 'es' | 'en') => {
+  const handleLangChange = async (lng: "es" | "en") => {
     await switchLanguage(lng);
     setSavedLangNotice(true);
     setTimeout(() => setSavedLangNotice(false), 2500);
@@ -52,24 +55,24 @@ export const SettingsPage: React.FC = () => {
     <div className="p-8 space-y-8 max-w-5xl mx-auto transition-colors">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-          {t('settings.title')}
+          {t("settings.title")}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {t('settings.subtitle')}
+          {t("settings.subtitle")}
         </p>
       </div>
 
       {savedThemeNotice && (
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-sm flex items-center space-x-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>{t('settings.appearance.changedNotification')}</span>
+          <span>{t("settings.appearance.changedNotification")}</span>
         </div>
       )}
 
       {savedLangNotice && (
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-sm flex items-center space-x-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>{t('settings.language.changedNotification')}</span>
+          <span>{t("settings.language.changedNotification")}</span>
         </div>
       )}
 
@@ -81,10 +84,10 @@ export const SettingsPage: React.FC = () => {
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-              {t('settings.appearance.title')}
+              {t("settings.appearance.title")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {t('settings.appearance.description')}
+              {t("settings.appearance.description")}
             </p>
           </div>
         </div>
@@ -93,71 +96,89 @@ export const SettingsPage: React.FC = () => {
           {/* Light Mode */}
           <button
             type="button"
-            onClick={() => handleThemeChange('light')}
+            onClick={() => handleThemeChange("light")}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-              theme === 'light'
-                ? 'border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
+              theme === "light"
+                ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
+                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60"
             }`}
           >
             <div className="flex items-center justify-between w-full mb-3">
               <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                 <Sun className="w-4 h-4" />
               </div>
-              {theme === 'light' && <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+              {theme === "light" && (
+                <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              )}
             </div>
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">{t('settings.appearance.light')}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('settings.appearance.lightDesc')}</p>
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                {t("settings.appearance.light")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {t("settings.appearance.lightDesc")}
+              </p>
             </div>
           </button>
 
           {/* Dark Mode */}
           <button
             type="button"
-            onClick={() => handleThemeChange('dark')}
+            onClick={() => handleThemeChange("dark")}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-              theme === 'dark'
-                ? 'border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
+              theme === "dark"
+                ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
+                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60"
             }`}
           >
             <div className="flex items-center justify-between w-full mb-3">
               <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                 <Moon className="w-4 h-4" />
               </div>
-              {theme === 'dark' && <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+              {theme === "dark" && (
+                <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              )}
             </div>
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">{t('settings.appearance.dark')}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('settings.appearance.darkDesc')}</p>
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                {t("settings.appearance.dark")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {t("settings.appearance.darkDesc")}
+              </p>
             </div>
           </button>
 
           {/* System Mode */}
           <button
             type="button"
-            onClick={() => handleThemeChange('system')}
+            onClick={() => handleThemeChange("system")}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-              theme === 'system'
-                ? 'border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
+              theme === "system"
+                ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
+                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60"
             }`}
           >
             <div className="flex items-center justify-between w-full mb-3">
               <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
                 <Laptop className="w-4 h-4" />
               </div>
-              {theme === 'system' && <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+              {theme === "system" && (
+                <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              )}
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
-                <p className="font-semibold text-slate-900 dark:text-white text-sm">{t('settings.appearance.system')}</p>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                  {t("settings.appearance.system")}
+                </p>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase font-mono">
                   {effectiveTheme}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('settings.appearance.systemDesc')}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {t("settings.appearance.systemDesc")}
+              </p>
             </div>
           </button>
         </div>
@@ -171,10 +192,10 @@ export const SettingsPage: React.FC = () => {
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-              {t('settings.language.title')}
+              {t("settings.language.title")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {t('settings.language.description')}
+              {t("settings.language.description")}
             </p>
           </div>
         </div>
@@ -182,34 +203,46 @@ export const SettingsPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <button
             type="button"
-            onClick={() => handleLangChange('es')}
+            onClick={() => handleLangChange("es")}
             className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
-              i18n.language === 'es'
-                ? 'border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
+              i18n.language === "es"
+                ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
+                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60"
             }`}
           >
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">{t('settings.language.es')}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Español (Predeterminado)</p>
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                {t("settings.language.es")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Español (Predeterminado)
+              </p>
             </div>
-            {i18n.language === 'es' && <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+            {i18n.language === "es" && (
+              <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            )}
           </button>
 
           <button
             type="button"
-            onClick={() => handleLangChange('en')}
+            onClick={() => handleLangChange("en")}
             className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
-              i18n.language === 'en'
-                ? 'border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
+              i18n.language === "en"
+                ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
+                : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60"
             }`}
           >
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">{t('settings.language.en')}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">English (US)</p>
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">
+                {t("settings.language.en")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                English (US)
+              </p>
             </div>
-            {i18n.language === 'en' && <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+            {i18n.language === "en" && (
+              <CheckCircle2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            )}
           </button>
         </div>
       </div>
@@ -223,10 +256,10 @@ export const SettingsPage: React.FC = () => {
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-                {t('settings.database.title')}
+                {t("settings.database.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t('settings.database.description')}
+                {t("settings.database.description")}
               </p>
             </div>
           </div>
@@ -235,8 +268,10 @@ export const SettingsPage: React.FC = () => {
             disabled={checking}
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${checking ? 'animate-spin' : ''}`} />
-            <span>{t('settings.database.checkButton')}</span>
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${checking ? "animate-spin" : ""}`}
+            />
+            <span>{t("settings.database.checkButton")}</span>
           </button>
         </div>
 
@@ -244,14 +279,22 @@ export const SettingsPage: React.FC = () => {
           {dbStatus?.connected ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="text-slate-700 dark:text-slate-200 font-medium">{t('settings.database.connected')}</span>
-              <span className="text-slate-400 dark:text-slate-500">({dbStatus.message})</span>
+              <span className="text-slate-700 dark:text-slate-200 font-medium">
+                {t("settings.database.connected")}
+              </span>
+              <span className="text-slate-400 dark:text-slate-500">
+                ({dbStatus.message})
+              </span>
             </>
           ) : (
             <>
               <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-              <span className="text-red-700 dark:text-red-400 font-medium">Error de base de datos</span>
-              <span className="text-red-500">({dbStatus?.message || 'No disponible'})</span>
+              <span className="text-red-700 dark:text-red-400 font-medium">
+                Error de base de datos
+              </span>
+              <span className="text-red-500">
+                ({dbStatus?.message || "No disponible"})
+              </span>
             </>
           )}
         </div>
@@ -265,7 +308,7 @@ export const SettingsPage: React.FC = () => {
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-              {t('settings.systemInfo.title')}
+              {t("settings.systemInfo.title")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Stack tecnológico activo en Cotizfy
@@ -275,20 +318,36 @@ export const SettingsPage: React.FC = () => {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-            <span className="text-slate-400 dark:text-slate-500 block">{t('settings.systemInfo.desktopEngine')}</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Electron v33</span>
+            <span className="text-slate-400 dark:text-slate-500 block">
+              {t("settings.systemInfo.desktopEngine")}
+            </span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              Electron v33
+            </span>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-            <span className="text-slate-400 dark:text-slate-500 block">{t('settings.systemInfo.frontend')}</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">React 18 + Vite</span>
+            <span className="text-slate-400 dark:text-slate-500 block">
+              {t("settings.systemInfo.frontend")}
+            </span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              React 18 + Vite
+            </span>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-            <span className="text-slate-400 dark:text-slate-500 block">{t('settings.systemInfo.orm')}</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Prisma 5.22 + SQLite</span>
+            <span className="text-slate-400 dark:text-slate-500 block">
+              {t("settings.systemInfo.orm")}
+            </span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              Prisma 5.22 + SQLite
+            </span>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-            <span className="text-slate-400 dark:text-slate-500 block">Internacionalización</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">i18next (ES/EN)</span>
+            <span className="text-slate-400 dark:text-slate-500 block">
+              Internacionalización
+            </span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              i18next (ES/EN)
+            </span>
           </div>
         </div>
       </div>

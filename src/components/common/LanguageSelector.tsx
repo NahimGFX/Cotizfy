@@ -1,16 +1,18 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Languages } from 'lucide-react';
-import { switchLanguage } from '../../i18n';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Languages } from "lucide-react";
+import { switchLanguage } from "../../i18n";
 
 interface LanguageSelectorProps {
   compact?: boolean;
 }
 
-export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ compact = false }) => {
+export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  compact = false,
+}) => {
   const { i18n, t } = useTranslation();
 
-  const handleLanguageChange = (lng: 'es' | 'en') => {
+  const handleLanguageChange = (lng: "es" | "en") => {
     switchLanguage(lng);
   };
 
@@ -23,25 +25,25 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ compact = fa
       )}
       <button
         type="button"
-        onClick={() => handleLanguageChange('es')}
+        onClick={() => handleLanguageChange("es")}
         className={`px-2.5 py-1 rounded transition-colors ${
-          i18n.language === 'es'
-            ? 'bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold'
-            : 'text-slate-600 hover:text-slate-900'
+          i18n.language === "es"
+            ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold"
+            : "text-slate-600 hover:text-slate-900"
         }`}
-        title={t('settings.language.es')}
+        title={t("settings.language.es")}
       >
         ES
       </button>
       <button
         type="button"
-        onClick={() => handleLanguageChange('en')}
+        onClick={() => handleLanguageChange("en")}
         className={`px-2.5 py-1 rounded transition-colors ${
-          i18n.language === 'en'
-            ? 'bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold'
-            : 'text-slate-600 hover:text-slate-900'
+          i18n.language === "en"
+            ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold"
+            : "text-slate-600 hover:text-slate-900"
         }`}
-        title={t('settings.language.en')}
+        title={t("settings.language.en")}
       >
         EN
       </button>
