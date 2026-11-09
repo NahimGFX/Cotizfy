@@ -20,8 +20,8 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
-    "package:win": "npm run build && electron-builder --win --x64",
-    "package:dir": "npm run build && electron-builder --dir"
+    "package:win": "npm run build && electron-builder --win --x64 --publish never",
+    "package:dir": "npm run build && electron-builder --dir --publish never"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
