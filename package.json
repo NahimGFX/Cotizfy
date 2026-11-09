@@ -1,6 +1,6 @@
 {
   "name": "cotizfy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Aplicación de escritorio para importar, analizar y comparar matrices de precios y presupuestos",
   "author": "Nahim <nahim@cotizfy.com>",
   "main": "dist-electron/main/index.js",
