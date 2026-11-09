@@ -8,12 +8,12 @@ Cotizfy es una aplicación de escritorio local para Windows que permite administ
 
 Todavía no hay capturas de pantalla versionadas en el repositorio. Se pueden agregar aquí cuando estén disponibles:
 
-| Pantalla                           | Captura   |
-| ---------------------------------- | --------- |
-| Dashboard                          | Implementado |
-| Comparación de matrices            | Implementado |
-| Importación y vista previa         | Implementado |
-| Gestión de proyectos y proveedores | Implementado |
+| Pantalla                           | Captura                 |
+| ---------------------------------- | ----------------------- |
+| Dashboard                          | Pendiente de captura    |
+| Comparación de matrices            | Pendiente de captura    |
+| Importación y vista previa         | Pendiente de captura    |
+| Gestión de proyectos y proveedores | Pendiente de captura    |
 
 ## Características principales
 
@@ -52,8 +52,8 @@ Las dependencias y versiones indicadas proceden de `package.json` (rangos semver
 | ---------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | React 18         | Interfaz de usuario                               | `react` `^18.3.1`, `react-dom` `^18.3.1`                                                    |
 | TypeScript       | Tipado y compilación                              | `typescript` `^5.6.3`                                                                       |
-| Vite             | Servidor y compilación del renderer               | `vite` `^5.4.11`, `@vitejs/plugin-react` `^4.3.4`                                           |
-| Electron         | Aplicación de escritorio y procesos main/renderer | `electron` `^33.2.1`                                                                        |
+| Vite             | Servidor y compilación del renderer               | `vite` `^8.3.6`, `@vitejs/plugin-react` `^6.2.1`                                           |
+| Electron         | Aplicación de escritorio y procesos main/renderer | `electron` `^45.2.3`                                                                        |
 | SQLite           | Almacenamiento local                              | Proveedor `sqlite` de Prisma                                                                |
 | Prisma ORM       | Cliente y modelo relacional                       | `prisma` `^5.22.0`, `@prisma/client` `^5.22.0`                                              |
 | Tailwind CSS     | Estilos                                           | `tailwindcss` `^3.4.17`, `postcss`, `autoprefixer`                                          |
@@ -61,11 +61,11 @@ Las dependencias y versiones indicadas proceden de `package.json` (rangos semver
 | Recharts         | Gráficos del comparador y Dashboard               | `recharts` `^2.15.0`                                                                        |
 | i18next          | Internacionalización                              | `i18next` `^24.2.0`, `i18next-browser-languagedetector` `^8.0.2`, `react-i18next` `^15.4.0` |
 | Lucide React     | Iconos                                            | `lucide-react` `^0.468.0`                                                                   |
-| Electron Builder | Empaquetado e instalador de Windows               | `electron-builder` `^25.1.8`                                                                |
+| Electron Builder | Empaquetado e instalador de Windows               | `electron-builder` `^26.18.0`                                                               |
 | tsup             | Compilación de main y preload                     | `tsup` `^8.3.5`                                                                             |
-| Zod              | No se utiliza actualmente                         | No está declarado en `package.json`                                                         |
+| Zod              | Validación del formulario de proyectos            | `zod` `^4.6.7`                                                                              |
 
-La validación de importaciones y operaciones CRUD está implementada con comprobaciones en TypeScript dentro del proceso principal; no se usa Zod.
+Las importaciones y operaciones CRUD también se validan en el proceso principal con comprobaciones en TypeScript.
 
 ## Arquitectura y estructura de carpetas
 
@@ -77,7 +77,6 @@ cotizfy/
 │   │   ├── db.ts             # Cliente Prisma, ruta de base de datos y migraciones
 │   │   ├── excel.ts          # Lectura, detección de grupos y validación Excel
 │   │   ├── importer.ts       # Persistencia transaccional de matrices
-│   │   ├── matrix.ts         # Operaciones de partidas, cotizaciones y proyectos
 │   │   └── ipc/index.ts      # Controladores IPC
 │   └── preload/
 │       ├── index.ts          # API limitada expuesta al renderer
@@ -85,7 +84,8 @@ cotizfy/
 ├── prisma/
 │   ├── schema.prisma         # Modelos SQLite
 │   └── migrations/           # Migraciones versionadas
-├── scripts/                  # Pruebas de importación, comparación y CRUD
+├── scripts/                  # Pruebas de importación SQLite y comparación
+├── .github/workflows/        # Generación de GitHub Releases al publicar tags
 ├── src/
 │   ├── components/           # Componentes de layout, proyectos y matrices
 │   ├── context/              # Contexto de tema
@@ -96,7 +96,7 @@ cotizfy/
 ├── electron-builder.json     # Empaquetado Windows x64 / NSIS
 ├── package.json              # Dependencias y comandos npm
 ├── tailwind.config.js
-└── vite.config.ts
+└── vite.config.mts
 ```
 
 ### Modelo de datos
@@ -125,7 +125,7 @@ No se declara un campo `engines` en `package.json`; la versión mínima de Node 
 Desde la raíz del repositorio:
 
 ```bash
-npm install
+npm ci
 npm run prisma:generate
 ```
 
@@ -215,6 +215,12 @@ npm run package:win
 ```
 
 Electron Builder usa NSIS, permite elegir el directorio de instalación y configura accesos directos para escritorio y menú Inicio. El directorio de salida definido es `release/`.
+
+El nombre esperado del instalador es `release/Cotizfy-Setup-<versión>-x64.exe`. Para generar un GitHub Release de forma automatizada, publica un tag que coincida con la versión de `package.json` (por ejemplo, `v1.0.0`). El workflow `.github/workflows/release-windows.yml` ejecuta pruebas, genera Prisma Client, compila Windows x64 y adjunta el instalador al Release. El workflow no se ejecuta hasta que se publique un tag.
+
+El instalador aún no está firmado digitalmente; Windows puede mostrar una advertencia de SmartScreen. No hay certificado de firma ni icono de Windows personalizado configurados en el repositorio.
+
+La auditoría de producción de npm reporta una vulnerabilidad alta en `xlsx` (`GHSA-4r6h-8v6p-xvw6` y `GHSA-5pgg-2g8v-p4x9`) y actualmente no ofrece una versión corregida. Revisa este riesgo antes de distribuir el instalador a usuarios que puedan abrir archivos Excel no confiables.
 
 ## Base de datos y migraciones Prisma
 

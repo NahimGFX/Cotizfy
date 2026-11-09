@@ -1,10 +1,32 @@
-import { PrismaClient } from "@prisma/client";
+import { createRequire } from "node:module";
+import type { PrismaClient as PrismaClientType } from "@prisma/client";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 
-let prisma: PrismaClient | null = null;
+let prisma: PrismaClientType | null = null;
+
+function loadPrismaClient(): typeof import("@prisma/client").PrismaClient {
+  if (app.isPackaged) {
+    const resourcesNodeModules = path.join(
+      process.resourcesPath,
+      "node_modules",
+    );
+    const existingPaths = (process.env.NODE_PATH || "")
+      .split(path.delimiter)
+      .filter(Boolean);
+    if (!existingPaths.includes(resourcesNodeModules)) {
+      process.env.NODE_PATH = [resourcesNodeModules, ...existingPaths].join(
+        path.delimiter,
+      );
+      // Prisma's generated client resolves its hidden `.prisma` package through NODE_PATH.
+      (require("node:module") as { _initPaths: () => void })._initPaths();
+    }
+  }
+  const requireFromMain = createRequire(__filename);
+  return requireFromMain("@prisma/client").PrismaClient;
+}
 
 export function getDatabasePath(): string {
   if (!app.isPackaged && process.env.COTIZFY_DATABASE_PATH) {
@@ -137,6 +159,7 @@ async function applyPendingMigrations(client: PrismaClient): Promise<void> {
 
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
+    const PrismaClient = loadPrismaClient();
     const dbPath = getDatabasePath();
     const dbUrl = `file:${dbPath}`;
 

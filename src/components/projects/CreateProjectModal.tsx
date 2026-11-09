@@ -72,7 +72,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       description,
     });
     if (!validation.success) {
-      setError(validation.error.errors[0]?.message || "Datos inválidos");
+      setError(validation.error.issues[0]?.message || "Datos inválidos");
       return;
     }
 
