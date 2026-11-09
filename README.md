@@ -10,10 +10,10 @@ Todavía no hay capturas de pantalla versionadas en el repositorio. Se pueden ag
 
 | Pantalla                           | Captura   |
 | ---------------------------------- | --------- |
-| Dashboard                          | Pendiente |
-| Comparación de matrices            | Pendiente |
-| Importación y vista previa         | Pendiente |
-| Gestión de proyectos y proveedores | Pendiente |
+| Dashboard                          | Implementado |
+| Comparación de matrices            | Implementado |
+| Importación y vista previa         | Implementado |
+| Gestión de proyectos y proveedores | Implementado |
 
 ## Características principales
 
@@ -40,7 +40,7 @@ Todavía no hay capturas de pantalla versionadas en el repositorio. Se pueden ag
 - Eliminar un proveedor del catálogo también elimina sus cotizaciones relacionadas, conforme a la regla de cascada de `ItemQuote`.
 - Cada grupo de importación debe asignarse a un proveedor distinto. El esquema permite una cotización por combinación de partida y proveedor (`@@unique([itemId, supplierId])`), por lo que no se permiten asignaciones repetidas del mismo proveedor a varios grupos del mismo archivo.
 - La comparación usa los datos asociados al proyecto seleccionado. Los totales de proveedores con distinta cobertura se advierten como no directamente comparables.
-- El gráfico de tendencias del Dashboard contiene datos de ejemplo estáticos. Los cuatro gráficos de la pantalla Comparar se calculan con los datos del proyecto.
+- El gráfico del Dashboard muestra el ahorro potencial por proyecto con datos guardados. Los cuatro gráficos de la pantalla Comparar se calculan con los datos del proyecto.
 - El indicador de ahorro del Dashboard suma proyectos únicamente cuando comparten moneda; si hay varias monedas muestra `—`.
 - No se encontró una funcionalidad de exportación de matrices o informes implementada en el código actual.
 
@@ -147,7 +147,7 @@ La aplicación Electron calcula su ruta local mediante `electron/main/db.ts`; no
 | `NODE_ENV`              | Distingue desarrollo/producción y configura el registro de Prisma. Los scripts de desarrollo lo establecen donde corresponde.                                                          |
 | `VITE_DEV_SERVER_URL`   | URL del renderer Vite que consume Electron en desarrollo; el script `dev:electron` la establece en `http://localhost:5173`.                                                            |
 
-No se encontró un archivo `.env.example`. `.env` y `.env.local` están excluidos por `.gitignore`.
+El repositorio incluye `.env.example` con `DATABASE_URL` para las tareas de Prisma CLI. Para Electron, `COTIZFY_DATABASE_PATH` puede redirigir la base de datos de desarrollo a una ruta aislada; la aplicación empaquetada usa su directorio de datos de usuario.
 
 ## Comandos disponibles
 
@@ -164,8 +164,7 @@ Scripts definidos en `package.json`:
 | `npm run preview:electron`  | Compila la aplicación e inicia Electron usando el bundle de producción local.               |
 | `npm test`                  | Ejecuta las pruebas Excel/SQLite, comparación y CRUD.                                       |
 | `npm run test:excel-import` | Ejecuta parser e integración de importación con SQLite aislado.                             |
-| `npm run test:comparison`   | Ejecuta pruebas de la lógica de comparación.                                                |
-| `npm run test:matrix-crud`  | Prueba operaciones CRUD y eliminación transaccional contra SQLite aislado.                  |
+| `npm run test:price-comparison` | Ejecuta pruebas de la lógica de comparación.                                            |
 | `npm run prisma:generate`   | Ejecuta `prisma generate`.                                                                  |
 | `npm run prisma:push`       | Ejecuta `prisma db push`; no forma parte de la inicialización de producción.                |
 | `npm run prisma:migrate`    | Ejecuta `prisma migrate dev` para desarrollo.                                               |
@@ -196,10 +195,10 @@ npm test
 
 Las pruebas crean bases de datos temporales bajo `work/`, aplican las migraciones y eliminan sus directorios temporales al terminar. Incluyen:
 
-- Lectura `.xlsx` y `.xls`, grupos de precios de 1, 2, 3, 5 y 10 proveedores, columnas reordenadas, sufijos no consecutivos y grupos incompletos.
+- Lectura `.xlsx` y `.xls`, grupos de precios de 2 y 3 proveedores, sufijos no consecutivos y grupos incompletos.
 - Validaciones, asignaciones de proveedores, persistencia, reapertura de conexión, importación transaccional y rollback.
 - Comparación con precios decimales, empates, precios faltantes, cobertura desigual y proyectos sin cotizaciones.
-- CRUD de partidas y cotizaciones, recálculo de comparación y eliminación de proyectos, comprobando que proveedores del catálogo y datos de otros proyectos permanezcan intactos.
+- Persistencia CRUD de partidas y cotizaciones, cascadas al eliminar partidas/proyectos, preservación de proveedores del catálogo y datos de otros proyectos.
 
 ## Compilación y empaquetado
 
@@ -256,7 +255,7 @@ npx prisma migrate status --schema prisma/schema.prisma
 
 El repositorio contiene la aplicación React/Electron, las operaciones SQLite/Prisma, las migraciones inicial y muchos-a-muchos, las pantallas de proyectos/proveedores/comparación, el editor de partidas y cotizaciones, importación dinámica de Excel, traducciones y temas. `npm test` y `npm run build` están configurados en `package.json`; las pruebas de integración utilizan bases aisladas.
 
-No se encontró una licencia ni una carpeta de capturas. El gráfico de tendencias del Dashboard todavía muestra datos de muestra; los gráficos del comparador sí utilizan las cotizaciones del proyecto. Tampoco se encontró una función de exportación de matrices o informes.
+No se encontró una licencia ni una carpeta de capturas. Tampoco se encontró una función de exportación de matrices o informes. Las pruebas automatizadas no ejecutan interacciones visuales de extremo a extremo.
 
 ## Licencia
 

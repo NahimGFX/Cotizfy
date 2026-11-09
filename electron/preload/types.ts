@@ -37,14 +37,14 @@ export interface ExcelRowPreview {
   description: string;
   quantity: number;
   unit: string;
-  quotes: [ExcelQuotePreview, ExcelQuotePreview];
+  quotes: ExcelQuotePreview[];
   rowNumber: number;
 }
 export interface ExcelMatrixPreview {
   rows: ExcelRowPreview[];
   errors: string[];
   warnings: string[];
-  groups: [string, string];
+  groups: string[];
 }
 export interface ExcelSelection {
   fileName: string;
@@ -99,6 +99,7 @@ export interface ElectronAPI {
       supplierIds?: string[];
     },
   ) => Promise<IpcResponse<{ id: string; name: string }>>;
+  deleteProject: (id: string) => Promise<IpcResponse<boolean>>;
   getSuppliers: () => Promise<IpcResponse<SupplierRecord[]>>;
   saveSupplier: (data: {
     id?: string;
@@ -113,6 +114,14 @@ export interface ElectronAPI {
     projectId: string,
     supplierIds: string[],
   ) => Promise<IpcResponse<boolean>>;
+  addSupplierToProject: (
+    projectId: string,
+    supplierId: string,
+  ) => Promise<IpcResponse<boolean>>;
+  createSupplierForProject: (
+    projectId: string,
+    name: string,
+  ) => Promise<IpcResponse<{ id: string; name: string }>>;
   getProjectSuppliers: (
     projectId: string,
   ) => Promise<IpcResponse<SupplierRecord[]>>;
@@ -123,11 +132,45 @@ export interface ElectronAPI {
   importExcelMatrix: (
     projectId: string,
     rows: ExcelRowPreview[],
-    supplierIds: [string, string],
+    supplierIds: string[],
   ) => Promise<IpcResponse<{ importedCount: number }>>;
   getProjectItems: (
     projectId: string,
   ) => Promise<IpcResponse<ProjectBudgetItem[]>>;
+  createBudgetItem: (
+    projectId: string,
+    data: {
+      itemNumber: string;
+      description: string;
+      quantity: number;
+      unit: string;
+    },
+  ) => Promise<IpcResponse<ProjectBudgetItem>>;
+  updateBudgetItem: (
+    projectId: string,
+    itemId: string,
+    data: {
+      itemNumber: string;
+      description: string;
+      quantity: number;
+      unit: string;
+    },
+  ) => Promise<IpcResponse<ProjectBudgetItem>>;
+  deleteBudgetItem: (
+    projectId: string,
+    itemId: string,
+  ) => Promise<IpcResponse<boolean>>;
+  saveItemQuote: (
+    projectId: string,
+    itemId: string,
+    supplierId: string,
+    data: { unitPrice: number | null; totalPrice: number | null },
+  ) => Promise<IpcResponse<{ id: string; warning: boolean }>>;
+  deleteItemQuote: (
+    projectId: string,
+    itemId: string,
+    supplierId: string,
+  ) => Promise<IpcResponse<boolean>>;
 
   // Window controls
   minimizeWindow: () => void;

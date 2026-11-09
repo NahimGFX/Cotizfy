@@ -79,7 +79,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 font-sans antialiased text-slate-800">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 font-sans antialiased text-slate-800 dark:bg-slate-950 dark:text-slate-100">
       {/* Sidebar Navigation */}
       <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} />
 
@@ -89,7 +89,7 @@ export const App: React.FC = () => {
         <Header currentTab={currentTab} />
 
         {/* Scrollable Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-slate-50">
+        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
           {notice && (
             <div
               role="status"

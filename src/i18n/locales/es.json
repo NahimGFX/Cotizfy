@@ -32,8 +32,8 @@
     "recentProjects": "Proyectos Recientes",
     "noRecentProjects": "No hay proyectos recientes creados",
     "createFirstProject": "Comienza creando tu primer proyecto o importando una matriz de Excel.",
-    "marketTrends": "Comparativa de Precios por Proveedor",
-    "chartPlaceholder": "Los gráficos de comparación se activarán al cargar datos de proveedores."
+    "marketTrends": "Ahorro potencial por proyecto",
+    "chartPlaceholder": "Ahorro estimado a partir de las diferencias entre los precios disponibles de cada partida."
   },
   "projects": {
     "title": "Gestión de Proyectos",

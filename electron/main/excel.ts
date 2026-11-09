@@ -9,26 +9,17 @@ export interface ImportedBudgetRow {
   description: string;
   quantity: number;
   unit: string;
-  quotes: [ImportedQuote, ImportedQuote];
+  quotes: ImportedQuote[];
   rowNumber: number;
 }
 export interface ExcelPreview {
   rows: ImportedBudgetRow[];
   errors: string[];
   warnings: string[];
-  groups: [string, string];
+  groups: string[];
 }
 
-const REQUIRED = [
-  "ITEM",
-  "DESCRIPCION",
-  "CANTIDAD",
-  "UNIDAD",
-  "PRECIO UNITARIO_1",
-  "PRECIO TOTAL_1",
-  "PRECIO UNITARIO_2",
-  "PRECIO TOTAL_2",
-];
+const REQUIRED = ["ITEM", "DESCRIPCION", "CANTIDAD", "UNIDAD"];
 
 function parseNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
@@ -65,7 +56,7 @@ export function parseExcelMatrix(
         en ? "The workbook has no sheets." : "El libro no contiene hojas.",
       ],
       warnings: [],
-      groups: ["_1", "_2"],
+      groups: [],
     };
   const data = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
     header: 1,
@@ -80,7 +71,7 @@ export function parseExcelMatrix(
       rows: [],
       errors: [en ? "The worksheet is empty." : "La hoja está vacía."],
       warnings: [],
-      groups: ["_1", "_2"],
+      groups: [],
     };
   const headers = data[headerRow].map((cell) =>
     String(cell).trim().toLocaleUpperCase(),
@@ -92,11 +83,36 @@ export function parseExcelMatrix(
     errors.push(
       `${en ? "Missing required columns" : "Faltan columnas obligatorias"}: ${missing.join(", ")}`,
     );
-  if (missing.length)
-    return { rows: [], errors, warnings, groups: ["_1", "_2"] };
+  if (missing.length) return { rows: [], errors, warnings, groups: [] };
   const index = Object.fromEntries(
     REQUIRED.map((name) => [name, headers.indexOf(name)]),
   ) as Record<string, number>;
+  const groupNumbers = [
+    ...new Set(
+      headers.flatMap((header) => {
+        const match = header.match(/^PRECIO (?:UNITARIO|TOTAL)_(\d+)$/);
+        return match ? [match[1]] : [];
+      }),
+    ),
+  ].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+  const groups = groupNumbers;
+  if (!groups.length)
+    errors.push(
+      en
+        ? "No price groups were found. Expected PRICE UNIT_N and PRICE TOTAL_N columns."
+        : "No se encontraron grupos de precios. Se esperan columnas PRECIO UNITARIO_N y PRECIO TOTAL_N.",
+    );
+  for (const group of groupNumbers) {
+    const unit = `PRECIO UNITARIO_${group}`;
+    const total = `PRECIO TOTAL_${group}`;
+    if (!headers.includes(unit) || !headers.includes(total))
+      warnings.push(
+        en
+          ? `Price group ${group} is incomplete; both unit and total price columns are expected.`
+          : `El grupo de precios ${group} está incompleto; se esperan las columnas de precio unitario y total.`,
+      );
+  }
+  const headerIndex = (name: string) => headers.indexOf(name);
   const rows: ImportedBudgetRow[] = [];
   const identifiers = new Map<string, number[]>();
   for (let i = headerRow + 1; i < data.length; i++) {
@@ -128,9 +144,11 @@ export function parseExcelMatrix(
       errors.push(
         `${en ? label : `Fila ${rowNumber}`}: ${en ? "quantity must be a valid non-negative number." : "la cantidad debe ser un número válido no negativo."}`,
       );
-    const prices = [1, 2].map((group) => {
-      const unitPrice = parseNumber(source[index[`PRECIO UNITARIO_${group}`]]);
-      const totalPrice = parseNumber(source[index[`PRECIO TOTAL_${group}`]]);
+    const prices = groupNumbers.map((group) => {
+      const unitCol = headerIndex(`PRECIO UNITARIO_${group}`);
+      const totalCol = headerIndex(`PRECIO TOTAL_${group}`);
+      const unitPrice = unitCol < 0 ? null : parseNumber(source[unitCol]);
+      const totalPrice = totalCol < 0 ? null : parseNumber(source[totalCol]);
       for (const [field, value] of [
         ["unit price", unitPrice],
         ["total price", totalPrice],
@@ -161,18 +179,20 @@ export function parseExcelMatrix(
           totalPrice !== null && !Number.isNaN(totalPrice) ? totalPrice : null,
       };
     });
-    if (itemNumber)
-      identifiers.set(itemNumber, [
-        ...(identifiers.get(itemNumber) || []),
+    if (itemNumber) {
+      const normalizedItemNumber = itemNumber.toLocaleLowerCase();
+      identifiers.set(normalizedItemNumber, [
+        ...(identifiers.get(normalizedItemNumber) || []),
         rowNumber,
       ]);
+    }
     if (quantity !== null && !Number.isNaN(quantity) && quantity >= 0)
       rows.push({
         itemNumber,
         description,
         quantity,
         unit,
-        quotes: prices as [ImportedQuote, ImportedQuote],
+        quotes: prices,
         rowNumber,
       });
   }
@@ -189,5 +209,5 @@ export function parseExcelMatrix(
         ? "No importable budget rows were found."
         : "No se encontraron partidas importables.",
     );
-  return { rows, errors, warnings, groups: ["_1", "_2"] };
+  return { rows, errors, warnings, groups };
 }

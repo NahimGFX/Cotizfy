@@ -114,7 +114,7 @@ export function calculatePriceComparison(
   const supplierStats = suppliers.map((supplier) => {
     const quoted = itemComparisons
       .map((entry) => entry.quotes[supplier.id])
-      .filter((entry) => entry?.quote);
+      .filter((entry) => entry?.quote && entry.totalPrice !== null);
     const quotedTotal = quoted.reduce(
       (sum, entry) => sum + (entry.totalPrice ?? 0),
       0,
@@ -144,12 +144,18 @@ export function calculatePriceComparison(
     };
   });
   const withQuotes = supplierStats.filter((stat) => stat.itemsQuoted > 0);
-  const cheapest = withQuotes.length
-    ? Math.min(...withQuotes.map((stat) => stat.quotedTotal))
-    : null;
-  const mostExpensive = withQuotes.length
-    ? Math.max(...withQuotes.map((stat) => stat.quotedTotal))
-    : null;
+  const comparableCoverage =
+    itemComparisons.length > 0 &&
+    supplierStats.length > 0 &&
+    supplierStats.every((stat) => stat.itemsQuoted === itemComparisons.length);
+  const cheapest =
+    comparableCoverage && withQuotes.length
+      ? Math.min(...withQuotes.map((stat) => stat.quotedTotal))
+      : null;
+  const mostExpensive =
+    comparableCoverage && withQuotes.length
+      ? Math.max(...withQuotes.map((stat) => stat.quotedTotal))
+      : null;
   const suppliersResult = supplierStats.map((stat) => ({
     ...stat,
     differenceFromCheapest:

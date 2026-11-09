@@ -13,6 +13,8 @@
     "preview:electron": "npm run build && cross-env NODE_ENV=production electron .",
     "build": "npm run build:renderer && npm run build:electron",
     "test:excel-import": "node scripts/test-excel-import.mjs",
+    "test:price-comparison": "node scripts/test-price-comparison.mjs",
+    "test": "npm run test:excel-import && npm run test:price-comparison",
     "build:renderer": "tsc --noEmit && vite build",
     "build:electron": "tsup electron/main/index.ts electron/preload/index.ts --format cjs --out-dir dist-electron --external electron --external @prisma/client",
     "prisma:generate": "prisma generate",

@@ -5,20 +5,23 @@ export async function importExcelRows(
   prisma: PrismaClient,
   projectId: string,
   rows: ImportedBudgetRow[],
-  supplierIds: [string, string],
+  supplierIds: string[],
 ): Promise<number> {
   if (!Array.isArray(rows) || rows.length === 0 || rows.length > 10000) {
     throw new Error("The import must contain between 1 and 10,000 rows.");
   }
   if (
     !Array.isArray(supplierIds) ||
-    supplierIds.length !== 2 ||
-    !supplierIds[0] ||
-    !supplierIds[1] ||
-    supplierIds[0] === supplierIds[1]
+    supplierIds.length === 0 ||
+    supplierIds.some((id) => typeof id !== "string" || !id.trim()) ||
+    new Set(supplierIds).size !== supplierIds.length ||
+    rows.some(
+      (row) =>
+        !Array.isArray(row?.quotes) || row.quotes.length !== supplierIds.length,
+    )
   ) {
     throw new Error(
-      "Assign two different project suppliers to the price groups.",
+      "Assign one different project supplier to each price group.",
     );
   }
 
@@ -27,8 +30,8 @@ export async function importExcelRows(
       where: { projectId, supplierId: { in: supplierIds } },
       select: { supplierId: true },
     });
-    if (allowed.length !== 2)
-      throw new Error("Both suppliers must be associated with this project.");
+    if (allowed.length !== supplierIds.length)
+      throw new Error("All suppliers must be associated with this project.");
     const startOrder = await tx.budgetItem.count({ where: { projectId } });
     for (const [offset, row] of rows.entries()) {
       if (
@@ -40,7 +43,7 @@ export async function importExcelRows(
         !Number.isFinite(row.quantity) ||
         row.quantity < 0 ||
         !Array.isArray(row.quotes) ||
-        row.quotes.length !== 2
+        row.quotes.length !== supplierIds.length
       ) {
         throw new Error(
           `Invalid budget row at spreadsheet row ${row?.rowNumber ?? offset + 1}.`,

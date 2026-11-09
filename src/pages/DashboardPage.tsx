@@ -18,7 +18,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from "recharts";
 import { fetchProjects } from "../services/api";
 import type { ProjectSummary } from "../../electron/preload/types";
@@ -41,17 +40,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const isDark = effectiveTheme === "dark";
 
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [supplierCount, setSupplierCount] = useState(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [potentialSavings, setPotentialSavings] = useState<{
     amount: number;
     currency: string;
   } | null>({ amount: 0, currency: "USD" });
+  const [savingsByProject, setSavingsByProject] = useState<
+    { project: string; savings: number }[]
+  >([]);
 
   useEffect(() => {
     let current = true;
     void (async () => {
-      const res = await fetchProjects();
+      const [res, suppliersResult] = await Promise.all([
+        fetchProjects(),
+        api.getSuppliers(),
+      ]);
       if (!current) return;
+      if (suppliersResult.success && suppliersResult.data)
+        setSupplierCount(suppliersResult.data.length);
       if (res.success && res.data) {
         setProjects(res.data);
         const currencies = [
@@ -70,27 +78,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               !suppliersResult.data
             )
               return null;
-            return calculatePriceComparison(
-              itemsResult.data,
-              suppliersResult.data.map((supplier) => ({
-                id: supplier.id,
-                name: supplier.name,
-              })),
-            ).potentialSavings;
+            return {
+              name: project.name,
+              savings: calculatePriceComparison(
+                itemsResult.data,
+                suppliersResult.data.map((supplier) => ({
+                  id: supplier.id,
+                  name: supplier.name,
+                })),
+              ).potentialSavings,
+            };
           }),
         );
-        if (current)
+        if (current) {
+          const dashboardComparisonIsValid =
+            currencies.length <= 1 && results.every((value) => value !== null);
+          setSavingsByProject(
+            dashboardComparisonIsValid
+              ? results.map((value) => ({
+                  project: value!.name,
+                  savings: value!.savings,
+                }))
+              : [],
+          );
           setPotentialSavings(
-            currencies.length <= 1 && results.every((value) => value !== null)
+            dashboardComparisonIsValid
               ? {
                   amount: results.reduce<number>(
-                    (sum, value) => sum + (value ?? 0),
+                    (sum, value) => sum + (value?.savings ?? 0),
                     0,
                   ),
                   currency: currencies[0] || "USD",
                 }
               : null,
           );
+        }
       } else setPotentialSavings(null);
       if (current) setLoading(false);
     })();
@@ -99,16 +121,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     };
   }, []);
 
-  const totalSuppliers = projects.reduce((acc, p) => acc + p.suppliersCount, 0);
+  const totalSuppliers = supplierCount;
   const totalItems = projects.reduce((acc, p) => acc + p.itemsCount, 0);
-
-  // Sample data for Recharts comparison demo
-  const sampleComparisonData = [
-    { item: "Concreto f'c 210", Prov_A: 320, Prov_B: 295, Prov_C: 310 },
-    { item: 'Acero corrugado 1/2"', Prov_A: 420, Prov_B: 450, Prov_C: 395 },
-    { item: "Ladrillo King Kong", Prov_A: 180, Prov_B: 165, Prov_C: 190 },
-    { item: "Cemento Portland", Prov_A: 260, Prov_B: 250, Prov_C: 255 },
-  ];
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto transition-colors">
@@ -243,7 +257,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={sampleComparisonData}
+                data={savingsByProject}
                 margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
               >
                 <CartesianGrid
@@ -252,7 +266,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   stroke={isDark ? "#334155" : "#f1f5f9"}
                 />
                 <XAxis
-                  dataKey="item"
+                  dataKey="project"
                   tick={{ fontSize: 12, fill: isDark ? "#94a3b8" : "#64748b" }}
                   axisLine={false}
                   tickLine={false}
@@ -271,30 +285,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     fontSize: "12px",
                   }}
                 />
-                <Legend
-                  iconType="circle"
-                  wrapperStyle={{
-                    fontSize: "12px",
-                    paddingTop: "10px",
-                    color: isDark ? "#94a3b8" : "#64748b",
-                  }}
-                />
                 <Bar
-                  dataKey="Prov_A"
-                  name="Proveedor 1"
+                  dataKey="savings"
+                  name={t("dashboard.stats.potentialSavings")}
                   fill="#0d9488"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="Prov_B"
-                  name="Proveedor 2"
-                  fill="#6366f1"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="Prov_C"
-                  name="Proveedor 3"
-                  fill="#f59e0b"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>

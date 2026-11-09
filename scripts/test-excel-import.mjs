@@ -76,6 +76,22 @@ try {
     );
     assert.equal(parsed.rows[1].quotes[1].unitPrice, null);
   }
+
+  const dynamicWorkbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(
+    dynamicWorkbook,
+    xlsx.utils.aoa_to_sheet([
+      [...matrix[0], "PRECIO UNITARIO_5", "PRECIO TOTAL_5"],
+      ["D-1", "Partida dinámica", 2, "u", 4.5, 9, 5, 10, 6, 12],
+    ]),
+    "Dynamic",
+  );
+  const dynamicParsed = parseExcelMatrix(
+    xlsx.write(dynamicWorkbook, { type: "buffer", bookType: "xlsx" }),
+    "es",
+  );
+  assert.deepEqual(dynamicParsed.groups, ["1", "2", "5"]);
+  assert.equal(dynamicParsed.rows[0].quotes.length, 3);
   const spanishWorkbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(
     spanishWorkbook,
@@ -165,11 +181,17 @@ try {
   const unlinkedSupplier = await prisma.supplier.create({
     data: { name: "Unlinked supplier" },
   });
+  const thirdSupplier = await prisma.supplier.create({
+    data: { name: "Supplier 3" },
+  });
   await prisma.projectSupplier.createMany({
     data: [
       { projectId: project.id, supplierId: firstSupplier.id },
       { projectId: project.id, supplierId: secondSupplier.id },
     ],
+  });
+  await prisma.projectSupplier.create({
+    data: { projectId: project.id, supplierId: thirdSupplier.id },
   });
 
   assert.equal(
@@ -216,7 +238,7 @@ try {
         firstSupplier.id,
         unlinkedSupplier.id,
       ]),
-    /Both suppliers must be associated/,
+    /All suppliers must be associated/,
   );
   assert.equal(
     await prisma.budgetItem.count({ where: { projectId: project.id } }),
@@ -250,8 +272,164 @@ try {
     3,
   );
 
+  const dynamicProject = await prisma.project.create({
+    data: { name: "Dynamic supplier integration" },
+  });
+  const dynamicSuppliers = await Promise.all(
+    [1, 2, 3].map((n) =>
+      prisma.supplier.create({ data: { name: `Dynamic ${n}` } }),
+    ),
+  );
+  await prisma.projectSupplier.createMany({
+    data: dynamicSuppliers.map((supplier, orderIndex) => ({
+      projectId: dynamicProject.id,
+      supplierId: supplier.id,
+      orderIndex,
+    })),
+  });
+  assert.equal(
+    await importExcelRows(
+      prisma,
+      dynamicProject.id,
+      dynamicParsed.rows,
+      dynamicSuppliers.map((supplier) => supplier.id),
+    ),
+    1,
+  );
+  const dynamicStored = await prisma.budgetItem.findFirst({
+    where: { projectId: dynamicProject.id },
+    include: { quotes: { orderBy: { supplierId: "asc" } } },
+  });
+  assert.equal(dynamicStored.quotes.length, 3);
+  assert.deepEqual(
+    dynamicStored.quotes.map((quote) => quote.totalPrice).sort((a, b) => a - b),
+    [9, 10, 12],
+  );
+
+  const editProject = await prisma.project.create({
+    data: { name: "Matrix CRUD integration" },
+  });
+  const editSupplier = await prisma.supplier.create({
+    data: { name: "CRUD supplier" },
+  });
+  await prisma.projectSupplier.create({
+    data: { projectId: editProject.id, supplierId: editSupplier.id },
+  });
+  let editItem = await prisma.budgetItem.create({
+    data: {
+      projectId: editProject.id,
+      itemNumber: "M-1",
+      description: "Original",
+      quantity: 2.5,
+      unit: "m",
+    },
+  });
+  editItem = await prisma.budgetItem.update({
+    where: { id: editItem.id },
+    data: {
+      itemNumber: "M-1",
+      description: "Edited",
+      quantity: 3.5,
+      unit: "kg",
+    },
+  });
+  assert.equal(editItem.description, "Edited");
+  assert.equal(editItem.quantity, 3.5);
+  let editQuote = await prisma.itemQuote.create({
+    data: {
+      itemId: editItem.id,
+      supplierId: editSupplier.id,
+      unitPrice: 1.25,
+      totalPrice: 4.375,
+    },
+  });
+  editQuote = await prisma.itemQuote.update({
+    where: { id: editQuote.id },
+    data: { unitPrice: 2, totalPrice: 7 },
+  });
+  assert.equal(editQuote.totalPrice, 7);
+  await prisma.itemQuote.delete({ where: { id: editQuote.id } });
+  assert.equal(
+    await prisma.itemQuote.count({ where: { itemId: editItem.id } }),
+    0,
+  );
+  await prisma.itemQuote.create({
+    data: {
+      itemId: editItem.id,
+      supplierId: editSupplier.id,
+      unitPrice: 2,
+      totalPrice: 7,
+    },
+  });
+  await prisma.budgetItem.delete({ where: { id: editItem.id } });
+  assert.equal(
+    await prisma.itemQuote.count({ where: { itemId: editItem.id } }),
+    0,
+    "deleting an item cascades its quotes",
+  );
+
+  const retainedSupplier = await prisma.supplier.create({
+    data: { name: "Supplier retained after project deletion" },
+  });
+  const retainedProject = await prisma.project.create({
+    data: { name: "Project to delete" },
+  });
+  await prisma.projectSupplier.create({
+    data: { projectId: retainedProject.id, supplierId: retainedSupplier.id },
+  });
+  const retainedItem = await prisma.budgetItem.create({
+    data: {
+      projectId: retainedProject.id,
+      itemNumber: "D-1",
+      description: "Delete with project",
+      quantity: 1,
+      unit: "u",
+    },
+  });
+  await prisma.itemQuote.create({
+    data: {
+      itemId: retainedItem.id,
+      supplierId: retainedSupplier.id,
+      unitPrice: 3,
+      totalPrice: 3,
+    },
+  });
+  const survivorProject = await prisma.project.create({
+    data: { name: "Surviving project" },
+  });
+  await prisma.budgetItem.create({
+    data: {
+      projectId: survivorProject.id,
+      itemNumber: "S-1",
+      description: "Keep",
+      quantity: 1,
+      unit: "u",
+    },
+  });
+  await prisma.$transaction(async (tx) =>
+    tx.project.delete({ where: { id: retainedProject.id } }),
+  );
+  assert.equal(
+    await prisma.supplier.count({ where: { id: retainedSupplier.id } }),
+    1,
+    "project deletion preserves catalog suppliers",
+  );
+  assert.equal(
+    await prisma.budgetItem.count({ where: { projectId: retainedProject.id } }),
+    0,
+  );
+  assert.equal(
+    await prisma.itemQuote.count({ where: { itemId: retainedItem.id } }),
+    0,
+  );
+  assert.equal(
+    await prisma.budgetItem.count({ where: { projectId: survivorProject.id } }),
+    1,
+    "other projects remain intact",
+  );
+
   console.log(
-    "Excel import integration passed: XLSX/XLS parsing; validation and warnings; applied migrations; project/supplier links; quote values and mapping; SQLite reopen; unlinked supplier rejection; transaction rollback.",
+    "Excel import integration passed: XLSX/XLS parsing; dynamic price groups; validation and warnings; project/supplier links; quote values and mapping; SQLite reopen; unlinked supplier rejection; transaction rollback.",
   );
 } finally {
   await prisma?.$disconnect().catch(() => {});

@@ -32,8 +32,8 @@
     "recentProjects": "Recent Projects",
     "noRecentProjects": "No recent projects found",
     "createFirstProject": "Get started by creating your first project or importing an Excel matrix.",
-    "marketTrends": "Supplier Price Comparison",
-    "chartPlaceholder": "Comparison charts will activate once supplier data is loaded."
+    "marketTrends": "Potential savings by project",
+    "chartPlaceholder": "Estimated savings from the price differences between available quotes for each item."
   },
   "projects": {
     "title": "Project Management",
