@@ -3,6 +3,7 @@ import { dialog } from "electron";
 import fs from "fs";
 import { parseExcelMatrix, type ImportedBudgetRow } from "../excel";
 import { importExcelRows } from "../importer";
+import { getProjectVatPercent, setProjectVatPercent } from "../projectSettings";
 import { getPrismaClient, initDatabase } from "../db";
 import type {
   IpcResponse,
@@ -90,6 +91,39 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       } catch (error) {
         console.error("Failed to save theme setting:", error);
         return false;
+      }
+    },
+  );
+
+  // VAT is stored in the existing AppSetting table and scoped to a project.
+  ipcMain.handle(
+    "projects:getVatPercent",
+    async (_event, projectId: string) => {
+      try {
+        return {
+          success: true,
+          data: await getProjectVatPercent(getPrismaClient(), projectId),
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Could not load VAT.",
+        };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "projects:setVatPercent",
+    async (_event, projectId: string, vatPercent: number) => {
+      try {
+        await setProjectVatPercent(getPrismaClient(), projectId, vatPercent);
+        return { success: true, data: true };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Could not save VAT.",
+        };
       }
     },
   );
@@ -241,6 +275,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         throw new Error("Invalid project id.");
       const prisma = getPrismaClient();
       await prisma.$transaction(async (tx) => {
+        await tx.appSetting.deleteMany({
+          where: { key: `project:${id}:vat-percent` },
+        });
         await tx.project.delete({ where: { id } });
       });
       return { success: true, data: true };

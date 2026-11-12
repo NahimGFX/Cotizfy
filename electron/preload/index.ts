@@ -15,6 +15,10 @@ const api: ElectronAPI = {
   createProject: (data) => ipcRenderer.invoke("projects:create", data),
   updateProject: (id, data) => ipcRenderer.invoke("projects:update", id, data),
   deleteProject: (id) => ipcRenderer.invoke("projects:delete", id),
+  getProjectVatPercent: (projectId) =>
+    ipcRenderer.invoke("projects:getVatPercent", projectId),
+  setProjectVatPercent: (projectId, vatPercent) =>
+    ipcRenderer.invoke("projects:setVatPercent", projectId, vatPercent),
   getSuppliers: () => ipcRenderer.invoke("suppliers:getAll"),
   saveSupplier: (data) => ipcRenderer.invoke("suppliers:save", data),
   deleteSupplier: (id) => ipcRenderer.invoke("suppliers:delete", id),

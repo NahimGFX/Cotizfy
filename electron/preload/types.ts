@@ -100,6 +100,11 @@ export interface ElectronAPI {
     },
   ) => Promise<IpcResponse<{ id: string; name: string }>>;
   deleteProject: (id: string) => Promise<IpcResponse<boolean>>;
+  getProjectVatPercent: (projectId: string) => Promise<IpcResponse<number>>;
+  setProjectVatPercent: (
+    projectId: string,
+    vatPercent: number,
+  ) => Promise<IpcResponse<boolean>>;
   getSuppliers: () => Promise<IpcResponse<SupplierRecord[]>>;
   saveSupplier: (data: {
     id?: string;

@@ -53,6 +53,8 @@ const dummyApi: ElectronAPI = {
     data: { id, name: data.name },
   }),
   deleteProject: async () => ({ success: true, data: true }),
+  getProjectVatPercent: async () => ({ success: true, data: 15 }),
+  setProjectVatPercent: async () => ({ success: true, data: true }),
   createBudgetItem: async (_projectId, data) => ({
     success: true,
     data: { id: "mock-item", ...data, quotes: [] },

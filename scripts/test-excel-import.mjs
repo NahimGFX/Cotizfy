@@ -23,6 +23,7 @@ try {
   const parserBundle = path.join(isolatedDirectory, "excel.cjs");
   const importerBundle = path.join(isolatedDirectory, "importer.cjs");
   const comparisonBundle = path.join(isolatedDirectory, "comparison.cjs");
+  const settingsBundle = path.join(isolatedDirectory, "project-settings.cjs");
   buildSync({
     entryPoints: [path.join(root, "electron/main/excel.ts")],
     bundle: true,
@@ -44,9 +45,19 @@ try {
     format: "cjs",
     outfile: comparisonBundle,
   });
+  buildSync({
+    entryPoints: [path.join(root, "electron/main/projectSettings.ts")],
+    bundle: true,
+    platform: "node",
+    format: "cjs",
+    outfile: settingsBundle,
+  });
   const { parseExcelMatrix } = require(parserBundle);
   const { importExcelRows } = require(importerBundle);
   const { calculatePriceComparison } = require(comparisonBundle);
+  const { getProjectVatPercent, setProjectVatPercent } = require(
+    settingsBundle,
+  );
 
   const matrix = [
     [
@@ -121,7 +132,13 @@ try {
   };
   const base = ["ITEM", "DESCRIPCION", "CANTIDAD", "UNIDAD"];
   const quoteHeaders = (n) => [`PRECIO UNITARIO_${n}`, `PRECIO TOTAL_${n}`];
-  const itemRow = (item, quoteCells) => [item, `Item ${item}`, 2, "u", ...quoteCells];
+  const itemRow = (item, quoteCells) => [
+    item,
+    `Item ${item}`,
+    2,
+    "u",
+    ...quoteCells,
+  ];
 
   const sparseComplete = parseMatrix(
     [...base, ...quoteHeaders(7), ...quoteHeaders(2)],
@@ -136,26 +153,42 @@ try {
 
   const partialGroup = parseMatrix(
     [...base, ...quoteHeaders(1), ...quoteHeaders(2), ...quoteHeaders(3)],
-    [itemRow("P-1", [8, 16, 9, 18, 7, ""]), itemRow("P-2", [12, 24, 11, 22, "", ""])],
+    [
+      itemRow("P-1", [8, 16, 9, 18, 7, ""]),
+      itemRow("P-2", [12, 24, 11, 22, "", ""]),
+    ],
   );
   assert.deepEqual(partialGroup.groups, ["1", "2"]);
-  assert.ok(partialGroup.warnings.some((message) => message.includes("group 3") && message.includes("row 2")));
+  assert.ok(
+    partialGroup.warnings.some(
+      (message) => message.includes("group 3") && message.includes("row 2"),
+    ),
+  );
 
   const partialColumns = parseMatrix(
     [...base, ...quoteHeaders(1), "PRECIO TOTAL_8"],
     [itemRow("H-1", [2, 4, 6]), itemRow("H-2", [3, 6, ""])],
   );
   assert.deepEqual(partialColumns.groups, ["1"]);
-  assert.ok(partialColumns.warnings.some((message) =>
-    message.includes("group 8") && message.includes("missing columns") && message.includes("PRECIO UNITARIO_8"),
-  ));
+  assert.ok(
+    partialColumns.warnings.some(
+      (message) =>
+        message.includes("group 8") &&
+        message.includes("missing columns") &&
+        message.includes("PRECIO UNITARIO_8"),
+    ),
+  );
 
   const emptyGroups = parseMatrix(
     [...base, ...quoteHeaders(1), "PRECIO TOTAL_2", "PRECIO TOTAL_3"],
     [itemRow("E-1", ["", "", "", ""])],
   );
   assert.deepEqual(emptyGroups.groups, []);
-  assert.ok(emptyGroups.errors.some((message) => message.includes("No complete price groups")));
+  assert.ok(
+    emptyGroups.errors.some((message) =>
+      message.includes("No complete price groups"),
+    ),
+  );
 
   const zeroGroup = parseMatrix(
     [...base, ...quoteHeaders(11)],
@@ -165,7 +198,10 @@ try {
   assert.deepEqual(zeroGroup.rows[0].quotes, [{ unitPrice: 0, totalPrice: 0 }]);
 
   const tenGroups = parseMatrix(
-    [...base, ...Array.from({ length: 12 }, (_, i) => quoteHeaders(i + 1)).flat()],
+    [
+      ...base,
+      ...Array.from({ length: 12 }, (_, i) => quoteHeaders(i + 1)).flat(),
+    ],
     [itemRow("M-1", Array.from({ length: 12 }, (_, i) => [i, i * 2]).flat())],
   );
   assert.equal(tenGroups.groups.length, 12, "supports 10 or more price groups");
@@ -175,7 +211,12 @@ try {
     [itemRow("C-1", [1, 2, 2, 4]), itemRow("C-2", [3, 6, 4, ""])],
   );
   assert.deepEqual(allCoverage.groups, ["4"]);
-  assert.ok(allCoverage.warnings.some((message) => message.includes("row 3") && message.includes("PRECIO TOTAL_9")));
+  assert.ok(
+    allCoverage.warnings.some(
+      (message) =>
+        message.includes("row 3") && message.includes("PRECIO TOTAL_9"),
+    ),
+  );
   const spanishWorkbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(
     spanishWorkbook,
@@ -256,6 +297,12 @@ try {
   const project = await prisma.project.create({
     data: { name: "Isolated Excel integration" },
   });
+  assert.equal(await getProjectVatPercent(prisma, project.id), 15);
+  await setProjectVatPercent(prisma, project.id, 12.5);
+  await assert.rejects(
+    () => setProjectVatPercent(prisma, project.id, -1),
+    /between 0 and 100/,
+  );
   const firstSupplier = await prisma.supplier.create({
     data: { name: "Supplier 1" },
   });
@@ -291,6 +338,7 @@ try {
   );
   await prisma.$disconnect();
   prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
+  assert.equal(await getProjectVatPercent(prisma, project.id), 12.5);
 
   const stored = await prisma.budgetItem.findMany({
     where: { projectId: project.id },
@@ -309,9 +357,15 @@ try {
     ].sort((a, b) => a[0].localeCompare(b[0])),
   );
   assert.equal(stored[1].quotes.length, 2);
-  assert.equal(stored[1].quotes[0].supplier.id, firstSupplier.id);
-  assert.equal(stored[1].quotes[0].unitPrice, 4);
-  assert.equal(stored[1].quotes[0].totalPrice, 14);
+  const secondItemQuotes = [...stored[1].quotes].sort((a, b) =>
+    a.supplier.id.localeCompare(b.supplier.id),
+  );
+  const firstSupplierQuote = secondItemQuotes.find(
+    (quote) => quote.supplier.id === firstSupplier.id,
+  );
+  assert.ok(firstSupplierQuote);
+  assert.equal(firstSupplierQuote.unitPrice, 4);
+  assert.equal(firstSupplierQuote.totalPrice, 14);
   const comparison = calculatePriceComparison(stored, [
     { id: firstSupplier.id, name: firstSupplier.name },
     { id: secondSupplier.id, name: secondSupplier.name },
@@ -519,7 +573,7 @@ try {
   );
 
   console.log(
-    "Excel import integration passed: XLSX/XLS parsing; dynamic price groups; validation and warnings; project/supplier links; quote values and mapping; SQLite reopen; unlinked supplier rejection; transaction rollback.",
+    "Excel integration passed: XLSX/XLS parsing; dynamic price groups; validation; project/supplier links; quote mapping; SQLite reopen; per-project VAT persistence; unlinked supplier rejection; transaction rollback.",
   );
 } finally {
   await prisma?.$disconnect().catch(() => {});
