@@ -21,6 +21,7 @@ import type {
 } from "../../electron/preload/types";
 import { ExcelImportPanel } from "../components/projects/ExcelImportPanel";
 import { MatrixEditor } from "../components/projects/MatrixEditor";
+import { PageHeader } from "../components/common/PageHeader";
 import { api } from "../services/api";
 import {
   calculatePriceComparison,
@@ -49,8 +50,7 @@ const colors = [
   "#f97316",
   "#64748b",
 ];
-const card =
-  "rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900";
+const card = "surface-card p-4";
 
 export const ComparePage: React.FC<ComparePageProps> = ({
   projects,
@@ -161,13 +161,11 @@ export const ComparePage: React.FC<ComparePageProps> = ({
   );
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 p-6 lg:p-8">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          {t("compare.title")}
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">{t("compare.subtitle")}</p>
-      </header>
+    <div className="page-content max-w-[1680px] space-y-6">
+      <PageHeader
+        title={t("compare.title")}
+        description={t("compare.subtitle")}
+      />
       {projects.length === 0 ? (
         <div className={`${card} mx-auto max-w-xl p-12 text-center`}>
           <GitCompareArrows className="mx-auto mb-4 h-8 w-8 text-teal-600" />
@@ -353,9 +351,14 @@ export const ComparePage: React.FC<ComparePageProps> = ({
                         {t("compare.unitPriceAndTotals")}
                       </p>
                     </div>
-                    <div className="overflow-auto">
-                      <table className="w-full min-w-max border-collapse text-left text-xs text-slate-700 dark:text-slate-200">
-                        <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800">
+                    <div
+                      role="region"
+                      aria-label={t("compare.itemComparison")}
+                      tabIndex={0}
+                      className="max-w-full overflow-auto focus-visible:rounded-xl"
+                    >
+                      <table className="data-table w-full min-w-max border-collapse text-left text-xs text-slate-700 dark:text-slate-200">
+                        <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm dark:bg-slate-800">
                           <tr>
                             <th rowSpan={2} className="p-3">
                               ITEM

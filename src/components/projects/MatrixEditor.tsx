@@ -220,7 +220,7 @@ export const MatrixEditor: React.FC<Props> = ({
         <button
           type="button"
           onClick={() => openItem(null)}
-          className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+          className="action-primary"
         >
           <Plus className="h-4 w-4" />
           {t("matrix.addItem")}
@@ -234,9 +234,14 @@ export const MatrixEditor: React.FC<Props> = ({
           {error}
         </div>
       )}
-      <div className="overflow-auto">
-        <table className="w-full min-w-[1000px] border-collapse text-left text-xs text-slate-700 dark:text-slate-200">
-          <thead className="bg-slate-50 dark:bg-slate-800">
+      <div
+        role="region"
+        aria-label={t("matrix.title")}
+        tabIndex={0}
+        className="max-w-full overflow-auto focus-visible:rounded-xl"
+      >
+        <table className="data-table w-full min-w-[1000px] border-collapse text-left text-xs text-slate-700 dark:text-slate-200">
+          <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm dark:bg-slate-800">
             <tr>
               <th className="p-3">ITEM</th>
               <th className="p-3">{t("excel.description")}</th>

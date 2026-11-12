@@ -79,21 +79,22 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 font-sans antialiased text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+    <div className="app-shell flex h-screen w-screen min-w-0 overflow-hidden font-sans antialiased">
       {/* Sidebar Navigation */}
       <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} />
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Top Header */}
         <Header currentTab={currentTab} />
 
         {/* Scrollable Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
+        <main className="app-main min-h-0 flex-1 overflow-auto">
           {notice && (
             <div
               role="status"
-              className={`mx-6 mt-4 rounded-lg border px-4 py-3 text-sm ${notice.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"}`}
+              aria-live={notice.type === "error" ? "assertive" : "polite"}
+              className={`mx-4 mt-4 rounded-xl border px-4 py-3 text-sm sm:mx-6 ${notice.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"}`}
             >
               {notice.message}
             </div>

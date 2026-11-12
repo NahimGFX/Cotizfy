@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, FileSpreadsheet, Plus, Upload, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FileSpreadsheet,
+  Plus,
+  Upload,
+  X,
+} from "lucide-react";
 import type {
   ExcelSelection,
   ProjectSummary,
@@ -28,8 +35,7 @@ export const ExcelImportPanel: React.FC<Props> = ({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const card =
-    "rounded-xl border border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100";
+  const card = "surface-card text-slate-900 dark:text-slate-100";
   useEffect(() => {
     setSelection(null);
     setSupplierIds([]);
@@ -176,15 +182,22 @@ export const ExcelImportPanel: React.FC<Props> = ({
   return (
     <section className={`${card} space-y-4 p-5`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{t("excel.title")}</h3>
-          <p className="text-sm text-slate-500">{project.name}</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+            <FileSpreadsheet className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-semibold">{t("excel.title")}</h3>
+            <p className="mt-0.5 truncate text-sm text-slate-500">
+              {project.name}
+            </p>
+          </div>
         </div>
         <button
           type="button"
           onClick={() => void chooseFile()}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+          className="action-primary w-full disabled:opacity-50 sm:w-auto"
         >
           <FileSpreadsheet className="h-4 w-4" />
           {busy ? t("common.loading") : t("excel.choose")}
@@ -233,6 +246,37 @@ export const ExcelImportPanel: React.FC<Props> = ({
                 <X className="h-5 w-5" />
               </button>
             </div>
+            <ol
+              aria-label={t("excel.preview")}
+              className="grid grid-cols-2 gap-2 border-b border-slate-200 bg-slate-50/70 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/70 sm:grid-cols-4"
+            >
+              {(["project", "file", "review", "confirm"] as const).map(
+                (step, index) => {
+                  const complete = index < 2 || (done && index === 2);
+                  const active = index === 2 ? !done : index === 3 && done;
+                  return (
+                    <li
+                      key={step}
+                      aria-current={active ? "step" : undefined}
+                      className={`flex min-w-0 items-center gap-2 text-xs font-medium ${complete || active ? "text-teal-700 dark:text-teal-300" : "text-slate-400"}`}
+                    >
+                      {complete ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      ) : (
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] ${active ? "border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-300" : "border-slate-300 dark:border-slate-700"}`}
+                        >
+                          {index + 1}
+                        </span>
+                      )}
+                      <span className="truncate">
+                        {t(`excel.steps.${step}`)}
+                      </span>
+                    </li>
+                  );
+                },
+              )}
+            </ol>
             <div className="flex-1 space-y-4 overflow-auto p-5">
               {selection.preview.groups.length > 0 && (
                 <section className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
@@ -369,7 +413,7 @@ export const ExcelImportPanel: React.FC<Props> = ({
                 </div>
               )}
               <div className="overflow-auto rounded-lg border border-slate-200 dark:border-slate-700">
-                <table className="w-full min-w-max border-collapse text-left text-xs">
+                <table className="data-table w-full min-w-max border-collapse text-left text-xs">
                   <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800">
                     <tr>
                       <th rowSpan={2} className="p-2">
@@ -448,12 +492,14 @@ export const ExcelImportPanel: React.FC<Props> = ({
               <p className="text-xs text-slate-500">{t("excel.confirmHint")}</p>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={close}
                   className="rounded-lg border border-slate-300 px-4 py-2 text-sm dark:border-slate-700"
                 >
                   {t("common.cancel")}
                 </button>
                 <button
+                  type="button"
                   disabled={
                     busy ||
                     selection.preview.errors.length > 0 ||

@@ -25,6 +25,7 @@ import { formatCurrency, formatNumber, formatDate } from "../utils/formatters";
 import { useTheme } from "../context/ThemeContext";
 import { api } from "../services/api";
 import { calculatePriceComparison } from "../utils/priceComparison";
+import { PageHeader } from "../components/common/PageHeader";
 
 interface DashboardPageProps {
   onNavigate: (tab: string) => void;
@@ -45,7 +46,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [potentialSavings, setPotentialSavings] = useState<{
     amount: number;
     currency: string;
-  } | null>({ amount: 0, currency: "USD" });
+  } | null>(null);
   const [savingsByProject, setSavingsByProject] = useState<
     { project: string; savings: number }[]
   >([]);
@@ -125,26 +126,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const totalItems = projects.reduce((acc, p) => acc + p.itemsCount, 0);
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto transition-colors">
-      {/* Title & subtitle */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-          {t("dashboard.title")}
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {t("dashboard.subtitle")}
-        </p>
-      </div>
+    <div className="page-content space-y-7 transition-colors">
+      <PageHeader
+        title={t("dashboard.title")}
+        description={t("dashboard.subtitle")}
+      />
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="surface-card flex items-center justify-between p-5 transition-colors">
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {t("dashboard.stats.totalProjects")}
             </p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              {formatNumber(projects.length, 0)}
+              {loading ? "—" : formatNumber(projects.length, 0)}
             </p>
           </div>
           <div className="w-11 h-11 bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center">
@@ -152,13 +148,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
+        <div className="surface-card flex items-center justify-between p-5 transition-colors">
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {t("dashboard.stats.totalSuppliers")}
             </p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              {formatNumber(totalSuppliers, 0)}
+              {loading ? "—" : formatNumber(totalSuppliers, 0)}
             </p>
           </div>
           <div className="w-11 h-11 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
@@ -166,13 +162,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
+        <div className="surface-card flex items-center justify-between p-5 transition-colors">
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {t("dashboard.stats.totalItems")}
             </p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              {formatNumber(totalItems, 0)}
+              {loading ? "—" : formatNumber(totalItems, 0)}
             </p>
           </div>
           <div className="w-11 h-11 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
@@ -180,18 +176,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
+        <div className="surface-card flex items-center justify-between p-5 transition-colors">
           <div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {t("dashboard.stats.potentialSavings")}
             </p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-              {potentialSavings
-                ? formatCurrency(
-                    potentialSavings.amount,
-                    potentialSavings.currency,
-                  )
-                : "—"}
+              {loading
+                ? "—"
+                : potentialSavings
+                  ? formatCurrency(
+                      potentialSavings.amount,
+                      potentialSavings.currency,
+                    )
+                  : "—"}
             </p>
           </div>
           <div className="w-11 h-11 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center">
@@ -201,7 +199,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* Quick Action Shortcuts */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
+      <div className="surface-card p-6 transition-colors">
         <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">
           {t("dashboard.quickActions.title")}
         </h3>
@@ -243,7 +241,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* Visual Analytics / Recharts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
+        <div className="surface-card min-w-0 p-6 transition-colors lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">
@@ -255,49 +253,64 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
           </div>
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={savingsByProject}
-                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+            {loading || savingsByProject.length === 0 ? (
+              <div
+                role="status"
+                className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 px-6 text-center text-sm text-slate-500 dark:border-slate-800"
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke={isDark ? "#334155" : "#f1f5f9"}
-                />
-                <XAxis
-                  dataKey="project"
-                  tick={{ fontSize: 12, fill: isDark ? "#94a3b8" : "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: isDark ? "#94a3b8" : "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDark ? "#020617" : "#0f172a",
-                    border: isDark ? "1px solid #334155" : "none",
-                    borderRadius: "8px",
-                    color: "#fff",
-                    fontSize: "12px",
-                  }}
-                />
-                <Bar
-                  dataKey="savings"
-                  name={t("dashboard.stats.potentialSavings")}
-                  fill="#0d9488"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                {loading ? t("common.loading") : t("dashboard.chartEmpty")}
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={savingsByProject}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke={isDark ? "#334155" : "#f1f5f9"}
+                  />
+                  <XAxis
+                    dataKey="project"
+                    tick={{
+                      fontSize: 12,
+                      fill: isDark ? "#94a3b8" : "#64748b",
+                    }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 12,
+                      fill: isDark ? "#94a3b8" : "#64748b",
+                    }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDark ? "#020617" : "#0f172a",
+                      border: isDark ? "1px solid #334155" : "none",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Bar
+                    dataKey="savings"
+                    name={t("dashboard.stats.potentialSavings")}
+                    fill="#0d9488"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
         {/* Recent Projects column */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col transition-colors">
+        <div className="surface-card flex min-w-0 flex-col p-6 transition-colors">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">
               {t("dashboard.recentProjects")}
@@ -326,10 +339,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </div>
             ) : (
               projects.slice(0, 4).map((p) => (
-                <div
+                <button
                   key={p.id}
+                  type="button"
                   onClick={() => onNavigate("projects")}
-                  className="p-3 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 cursor-pointer transition-colors"
+                  className="w-full rounded-xl border border-slate-100 bg-slate-50/50 p-3 text-left transition-colors hover:bg-slate-100/60 focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800/80 dark:bg-slate-800/40 dark:hover:bg-slate-800/80"
                 >
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                     {p.name}
@@ -338,7 +352,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     <span>{p.client || "General"}</span>
                     <span>{formatDate(p.updatedAt, "short")}</span>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>

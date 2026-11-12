@@ -22,6 +22,7 @@ let prisma;
 try {
   const parserBundle = path.join(isolatedDirectory, "excel.cjs");
   const importerBundle = path.join(isolatedDirectory, "importer.cjs");
+  const comparisonBundle = path.join(isolatedDirectory, "comparison.cjs");
   buildSync({
     entryPoints: [path.join(root, "electron/main/excel.ts")],
     bundle: true,
@@ -36,8 +37,16 @@ try {
     format: "cjs",
     outfile: importerBundle,
   });
+  buildSync({
+    entryPoints: [path.join(root, "src/utils/priceComparison.ts")],
+    bundle: true,
+    platform: "node",
+    format: "cjs",
+    outfile: comparisonBundle,
+  });
   const { parseExcelMatrix } = require(parserBundle);
   const { importExcelRows } = require(importerBundle);
+  const { calculatePriceComparison } = require(comparisonBundle);
 
   const matrix = [
     [
@@ -49,9 +58,13 @@ try {
       "PRECIO TOTAL_1",
       "PRECIO UNITARIO_2",
       "PRECIO TOTAL_2",
+      "PRECIO UNITARIO_3",
+      "PRECIO TOTAL_3",
+      "PRECIO TOTAL_4",
+      "PRECIO TOTAL_5",
     ],
-    ["A-1", "Cable", 5, "m", 2.5, 12.5, 3, 15],
-    ["A-1", "Cable adicional", 3, "m", 4, 14, "", ""],
+    ["A-1", "Cable", 5, "m", 2.5, 12.5, 3, 15, "", "", "", ""],
+    ["A-1", "Cable adicional", 3, "m", 4, 14, 3, 9, "", "", "", ""],
   ];
   let parsed;
   for (const bookType of ["xlsx", "xls"]) {
@@ -74,14 +87,15 @@ try {
         message.includes("differs from quantity"),
       ),
     );
-    assert.equal(parsed.rows[1].quotes[1].unitPrice, null);
+    assert.deepEqual(parsed.groups, ["1", "2"]);
+    assert.equal(parsed.rows[1].quotes[1].unitPrice, 3);
   }
 
   const dynamicWorkbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(
     dynamicWorkbook,
     xlsx.utils.aoa_to_sheet([
-      [...matrix[0], "PRECIO UNITARIO_5", "PRECIO TOTAL_5"],
+      [...matrix[0].slice(0, 8), "PRECIO UNITARIO_5", "PRECIO TOTAL_5"],
       ["D-1", "Partida dinámica", 2, "u", 4.5, 9, 5, 10, 6, 12],
     ]),
     "Dynamic",
@@ -92,6 +106,76 @@ try {
   );
   assert.deepEqual(dynamicParsed.groups, ["1", "2", "5"]);
   assert.equal(dynamicParsed.rows[0].quotes.length, 3);
+
+  const parseMatrix = (headers, rows) => {
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(
+      workbook,
+      xlsx.utils.aoa_to_sheet([headers, ...rows]),
+      "Case",
+    );
+    return parseExcelMatrix(
+      xlsx.write(workbook, { type: "buffer", bookType: "xlsx" }),
+      "en",
+    );
+  };
+  const base = ["ITEM", "DESCRIPCION", "CANTIDAD", "UNIDAD"];
+  const quoteHeaders = (n) => [`PRECIO UNITARIO_${n}`, `PRECIO TOTAL_${n}`];
+  const itemRow = (item, quoteCells) => [item, `Item ${item}`, 2, "u", ...quoteCells];
+
+  const sparseComplete = parseMatrix(
+    [...base, ...quoteHeaders(7), ...quoteHeaders(2)],
+    [itemRow("S-1", [4, 8, 5, 10]), ["", "", "", ""]],
+  );
+  assert.deepEqual(sparseComplete.groups, ["2", "7"]);
+  assert.deepEqual(sparseComplete.rows[0].quotes, [
+    { unitPrice: 5, totalPrice: 10 },
+    { unitPrice: 4, totalPrice: 8 },
+  ]);
+  assert.equal(sparseComplete.rows.length, 1, "fully blank rows are ignored");
+
+  const partialGroup = parseMatrix(
+    [...base, ...quoteHeaders(1), ...quoteHeaders(2), ...quoteHeaders(3)],
+    [itemRow("P-1", [8, 16, 9, 18, 7, ""]), itemRow("P-2", [12, 24, 11, 22, "", ""])],
+  );
+  assert.deepEqual(partialGroup.groups, ["1", "2"]);
+  assert.ok(partialGroup.warnings.some((message) => message.includes("group 3") && message.includes("row 2")));
+
+  const partialColumns = parseMatrix(
+    [...base, ...quoteHeaders(1), "PRECIO TOTAL_8"],
+    [itemRow("H-1", [2, 4, 6]), itemRow("H-2", [3, 6, ""])],
+  );
+  assert.deepEqual(partialColumns.groups, ["1"]);
+  assert.ok(partialColumns.warnings.some((message) =>
+    message.includes("group 8") && message.includes("missing columns") && message.includes("PRECIO UNITARIO_8"),
+  ));
+
+  const emptyGroups = parseMatrix(
+    [...base, ...quoteHeaders(1), "PRECIO TOTAL_2", "PRECIO TOTAL_3"],
+    [itemRow("E-1", ["", "", "", ""])],
+  );
+  assert.deepEqual(emptyGroups.groups, []);
+  assert.ok(emptyGroups.errors.some((message) => message.includes("No complete price groups")));
+
+  const zeroGroup = parseMatrix(
+    [...base, ...quoteHeaders(11)],
+    [itemRow("Z-1", [0, 0])],
+  );
+  assert.deepEqual(zeroGroup.groups, ["11"]);
+  assert.deepEqual(zeroGroup.rows[0].quotes, [{ unitPrice: 0, totalPrice: 0 }]);
+
+  const tenGroups = parseMatrix(
+    [...base, ...Array.from({ length: 12 }, (_, i) => quoteHeaders(i + 1)).flat()],
+    [itemRow("M-1", Array.from({ length: 12 }, (_, i) => [i, i * 2]).flat())],
+  );
+  assert.equal(tenGroups.groups.length, 12, "supports 10 or more price groups");
+
+  const allCoverage = parseMatrix(
+    [...base, ...quoteHeaders(4), ...quoteHeaders(9)],
+    [itemRow("C-1", [1, 2, 2, 4]), itemRow("C-2", [3, 6, 4, ""])],
+  );
+  assert.deepEqual(allCoverage.groups, ["4"]);
+  assert.ok(allCoverage.warnings.some((message) => message.includes("row 3") && message.includes("PRECIO TOTAL_9")));
   const spanishWorkbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(
     spanishWorkbook,
@@ -224,10 +308,16 @@ try {
       [secondSupplier.id, 3, 15],
     ].sort((a, b) => a[0].localeCompare(b[0])),
   );
-  assert.equal(stored[1].quotes.length, 1);
+  assert.equal(stored[1].quotes.length, 2);
   assert.equal(stored[1].quotes[0].supplier.id, firstSupplier.id);
   assert.equal(stored[1].quotes[0].unitPrice, 4);
   assert.equal(stored[1].quotes[0].totalPrice, 14);
+  const comparison = calculatePriceComparison(stored, [
+    { id: firstSupplier.id, name: firstSupplier.name },
+    { id: secondSupplier.id, name: secondSupplier.name },
+  ]);
+  assert.equal(comparison.items[0].lowest, 2.5);
+  assert.equal(comparison.items[1].lowest, 3);
 
   const initialCount = await prisma.budgetItem.count({
     where: { projectId: project.id },
@@ -269,7 +359,7 @@ try {
     await prisma.itemQuote.count({
       where: { budgetItem: { projectId: project.id } },
     }),
-    3,
+    4,
   );
 
   const dynamicProject = await prisma.project.create({

@@ -26,6 +26,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <button
         type="button"
         onClick={() => handleLanguageChange("es")}
+        aria-pressed={i18n.language === "es"}
+        aria-label={t("settings.language.es")}
         className={`px-2.5 py-1 rounded transition-colors ${
           i18n.language === "es"
             ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold"
@@ -38,6 +40,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <button
         type="button"
         onClick={() => handleLanguageChange("en")}
+        aria-pressed={i18n.language === "en"}
+        aria-label={t("settings.language.en")}
         className={`px-2.5 py-1 rounded transition-colors ${
           i18n.language === "en"
             ? "bg-white dark:bg-slate-700 text-teal-700 dark:text-teal-400 shadow-xs font-semibold"

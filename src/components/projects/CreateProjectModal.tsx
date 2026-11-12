@@ -99,21 +99,31 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-md overflow-hidden animate-fadeIn">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+        className="surface-card w-full max-w-lg overflow-hidden text-slate-900 shadow-2xl animate-fadeIn dark:text-slate-100"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-950 dark:text-teal-300 flex items-center justify-center">
               <FolderPlus className="w-4 h-4" />
             </div>
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-base">
+            <h3
+              id="project-modal-title"
+              className="text-base font-semibold text-slate-800 dark:text-slate-100"
+            >
               {editingProject
                 ? t("projects.editModalTitle")
                 : t("projects.createModal.title")}
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label={t("common.close")}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md"
           >
             <X className="w-5 h-5" />
@@ -132,41 +142,53 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label
+              htmlFor="project-name"
+              className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300"
+            >
               {t("projects.createModal.nameLabel")} *
             </label>
             <input
+              id="project-name"
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("projects.createModal.namePlaceholder")}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              className="control w-full px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label
+                htmlFor="project-client"
+                className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300"
+              >
                 {t("projects.createModal.clientLabel")}
               </label>
               <input
+                id="project-client"
                 type="text"
                 value={client}
                 onChange={(e) => setClient(e.target.value)}
                 placeholder={t("projects.createModal.clientPlaceholder")}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                className="control w-full px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label
+                htmlFor="project-currency"
+                className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300"
+              >
                 {t("projects.createModal.currencyLabel")}
               </label>
               <select
+                id="project-currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 bg-white dark:bg-slate-800"
+                className="control w-full px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               >
                 <option value="USD">USD ($)</option>
                 <option value="PEN">PEN (S/)</option>
@@ -241,15 +263,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label
+              htmlFor="project-description"
+              className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300"
+            >
               {t("projects.createModal.descriptionLabel")}
             </label>
             <textarea
+              id="project-description"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("projects.createModal.descriptionPlaceholder")}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none"
+              className="control w-full resize-none px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             />
           </div>
 
@@ -264,7 +290,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
+              className="action-primary disabled:opacity-50"
             >
               {loading
                 ? t("common.loading")

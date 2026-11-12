@@ -21,6 +21,11 @@ export interface ExcelPreview {
 
 const REQUIRED = ["ITEM", "DESCRIPCION", "CANTIDAD", "UNIDAD"];
 
+function isEmptyCell(value: unknown): boolean {
+  return value === null || value === undefined ||
+    (typeof value === "string" && value.trim() === "");
+}
+
 function parseNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : NaN;
@@ -95,23 +100,15 @@ export function parseExcelMatrix(
       }),
     ),
   ].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
-  const groups = groupNumbers;
-  if (!groups.length)
-    errors.push(
-      en
-        ? "No price groups were found. Expected PRICE UNIT_N and PRICE TOTAL_N columns."
-        : "No se encontraron grupos de precios. Se esperan columnas PRECIO UNITARIO_N y PRECIO TOTAL_N.",
-    );
-  for (const group of groupNumbers) {
-    const unit = `PRECIO UNITARIO_${group}`;
-    const total = `PRECIO TOTAL_${group}`;
-    if (!headers.includes(unit) || !headers.includes(total))
-      warnings.push(
-        en
-          ? `Price group ${group} is incomplete; both unit and total price columns are expected.`
-          : `El grupo de precios ${group} está incompleto; se esperan las columnas de precio unitario y total.`,
-      );
-  }
+  const groupData = new Map<
+    string,
+    { hasData: boolean; incomplete: Map<number, Set<string>> }
+  >(
+    groupNumbers.map((group) => [
+      group,
+      { hasData: false, incomplete: new Map<number, Set<string>>() },
+    ]),
+  );
   const headerIndex = (name: string) => headers.indexOf(name);
   const rows: ImportedBudgetRow[] = [];
   const identifiers = new Map<string, number[]>();
@@ -119,7 +116,7 @@ export function parseExcelMatrix(
     const source = data[i];
     if (
       !source ||
-      source.every((cell) => cell === "" || cell === null || cell === undefined)
+      source.every(isEmptyCell)
     )
       continue;
     const rowNumber = i + 1;
@@ -147,8 +144,14 @@ export function parseExcelMatrix(
     const prices = groupNumbers.map((group) => {
       const unitCol = headerIndex(`PRECIO UNITARIO_${group}`);
       const totalCol = headerIndex(`PRECIO TOTAL_${group}`);
-      const unitPrice = unitCol < 0 ? null : parseNumber(source[unitCol]);
-      const totalPrice = totalCol < 0 ? null : parseNumber(source[totalCol]);
+      const unitRaw = unitCol < 0 ? undefined : source[unitCol];
+      const totalRaw = totalCol < 0 ? undefined : source[totalCol];
+      const unitPrice = unitCol < 0 ? null : parseNumber(unitRaw);
+      const totalPrice = totalCol < 0 ? null : parseNumber(totalRaw);
+      const state = groupData.get(group)!;
+      const hasUnit = !isEmptyCell(unitRaw);
+      const hasTotal = !isEmptyCell(totalRaw);
+      if (itemNumber && (hasUnit || hasTotal)) state.hasData = true;
       for (const [field, value] of [
         ["unit price", unitPrice],
         ["total price", totalPrice],
@@ -158,10 +161,23 @@ export function parseExcelMatrix(
             `${en ? label : `Fila ${rowNumber}`}: ${en ? `${field} for group ${group} must be a non-negative number.` : `${field === "unit price" ? "el precio unitario" : "el precio total"} del grupo ${group} debe ser un número no negativo.`}`,
           );
       }
-      if ((unitPrice === null) !== (totalPrice === null))
-        warnings.push(
-          `${en ? label : `Fila ${rowNumber}`}: ${en ? `group ${group} has an incomplete quote.` : `el grupo ${group} tiene una cotización incompleta.`}`,
-        );
+      const completeQuote =
+        unitCol >= 0 &&
+        totalCol >= 0 &&
+        unitPrice !== null &&
+        Number.isFinite(unitPrice) &&
+        unitPrice >= 0 &&
+        totalPrice !== null &&
+        Number.isFinite(totalPrice) &&
+        totalPrice >= 0;
+      if (itemNumber && !completeQuote) {
+        const missing = new Set<string>();
+        if (unitCol < 0 || unitPrice === null || !Number.isFinite(unitPrice) || unitPrice < 0)
+          missing.add(`PRECIO UNITARIO_${group}`);
+        if (totalCol < 0 || totalPrice === null || !Number.isFinite(totalPrice) || totalPrice < 0)
+          missing.add(`PRECIO TOTAL_${group}`);
+        if (missing.size) state.incomplete.set(rowNumber, missing);
+      }
       if (
         quantity !== null &&
         !Number.isNaN(quantity) &&
@@ -203,6 +219,51 @@ export function parseExcelMatrix(
           ? `Duplicate ITEM "${id}" on rows ${locations.join(", ")}.`
           : `El ITEM "${id}" está repetido en las filas ${locations.join(", ")}.`,
       );
+  const groups = groupNumbers.filter((group) => {
+    const state = groupData.get(group)!;
+    const unitExists = headerIndex(`PRECIO UNITARIO_${group}`) >= 0;
+    const totalExists = headerIndex(`PRECIO TOTAL_${group}`) >= 0;
+    // Header-only groups with no values are prepared columns, not supplier quotes.
+    if (!state.hasData) return false;
+    const complete =
+      unitExists &&
+      totalExists &&
+      state.incomplete.size === 0 &&
+      rows.length > 0;
+    if (!complete) {
+      const affected = [...state.incomplete.entries()]
+        .map(([row, columns]) =>
+          `${en ? "row" : "fila"} ${row} (${[...columns].join(", ")})`,
+        )
+        .join("; ");
+      const missingHeaders = [
+        unitExists ? "" : `PRECIO UNITARIO_${group}`,
+        totalExists ? "" : `PRECIO TOTAL_${group}`,
+      ].filter(Boolean);
+      const details = [
+        missingHeaders.length
+          ? `${en ? "missing columns" : "faltan columnas"}: ${missingHeaders.join(", ")}`
+          : "",
+        affected ? `${en ? "incomplete values" : "valores incompletos"}: ${affected}` : "",
+      ].filter(Boolean);
+      warnings.push(
+        en
+          ? `Price group ${group} was ignored because it is incomplete${details.length ? ` (${details.join("; ")})` : ""}.`
+          : `Se ignoró el grupo de precios ${group} porque está incompleto${details.length ? ` (${details.join("; ")})` : ""}.`,
+      );
+      return false;
+    }
+    return true;
+  });
+  const validGroupIndexes = groups.map((group) => groupNumbers.indexOf(group));
+  for (const row of rows)
+    row.quotes = validGroupIndexes.map((index) => row.quotes[index]);
+  if (!groups.length)
+    errors.push(
+      en
+        ? "No complete price groups with quotes were found. Expected valid PRICE UNIT_N and PRICE TOTAL_N values for every budget item."
+        : "No se encontraron grupos de precios completos. Cada partida debe tener valores válidos en PRECIO UNITARIO_N y PRECIO TOTAL_N.",
+    );
   if (!rows.length)
     errors.push(
       en

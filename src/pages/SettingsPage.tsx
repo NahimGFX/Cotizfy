@@ -16,6 +16,7 @@ import { switchLanguage } from "../i18n";
 import { checkDatabase } from "../services/api";
 import { useTheme } from "../context/ThemeContext";
 import type { ThemeMode } from "../../electron/preload/types";
+import { PageHeader } from "../components/common/PageHeader";
 
 export const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -52,15 +53,11 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-5xl mx-auto transition-colors">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-          {t("settings.title")}
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {t("settings.subtitle")}
-        </p>
-      </div>
+    <div className="page-content max-w-5xl space-y-7 transition-colors">
+      <PageHeader
+        title={t("settings.title")}
+        description={t("settings.subtitle")}
+      />
 
       {savedThemeNotice && (
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-sm flex items-center space-x-2 animate-fadeIn">
@@ -77,7 +74,7 @@ export const SettingsPage: React.FC = () => {
       )}
 
       {/* Theme & Appearance Section */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
+      <div className="surface-card space-y-4 p-6 transition-colors">
         <div className="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
             <Palette className="w-4 h-4" />
@@ -97,6 +94,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleThemeChange("light")}
+            aria-pressed={theme === "light"}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
               theme === "light"
                 ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
@@ -125,6 +123,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleThemeChange("dark")}
+            aria-pressed={theme === "dark"}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
               theme === "dark"
                 ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
@@ -153,6 +152,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleThemeChange("system")}
+            aria-pressed={theme === "system"}
             className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
               theme === "system"
                 ? "border-teal-500 bg-teal-50/40 dark:bg-teal-950/20 ring-2 ring-teal-500/20"
@@ -185,7 +185,7 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Language Section */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
+      <div className="surface-card space-y-4 p-6 transition-colors">
         <div className="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
             <Globe className="w-4 h-4" />
@@ -290,10 +290,10 @@ export const SettingsPage: React.FC = () => {
             <>
               <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
               <span className="text-red-700 dark:text-red-400 font-medium">
-                Error de base de datos
+                {t("settings.database.error")}
               </span>
               <span className="text-red-500">
-                ({dbStatus?.message || "No disponible"})
+                ({dbStatus?.message || t("settings.database.unavailable")})
               </span>
             </>
           )}
@@ -301,7 +301,7 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* System info */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
+      <div className="surface-card space-y-4 p-6 transition-colors">
         <div className="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
             <Cpu className="w-4 h-4" />
@@ -311,7 +311,7 @@ export const SettingsPage: React.FC = () => {
               {t("settings.systemInfo.title")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Stack tecnológico activo en Cotizfy
+              {t("settings.systemInfo.description")}
             </p>
           </div>
         </div>
@@ -322,7 +322,7 @@ export const SettingsPage: React.FC = () => {
               {t("settings.systemInfo.desktopEngine")}
             </span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
-              Electron v33
+              Electron
             </span>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
@@ -343,7 +343,7 @@ export const SettingsPage: React.FC = () => {
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
             <span className="text-slate-400 dark:text-slate-500 block">
-              Internacionalización
+              {t("settings.systemInfo.internationalization")}
             </span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               i18next (ES/EN)

@@ -1,13 +1,14 @@
 {
   "app": {
     "name": "Cotizfy",
-    "tagline": "Comparador de Presupuestos y Matrices de Precios",
+    "tagline": "Comparador de Precios",
     "version": "Versión",
     "ready": "Listo",
     "connected": "Conectado",
     "disconnected": "Desconectado"
   },
   "nav": {
+    "workspace": "Espacio de trabajo",
     "dashboard": "Panel Principal",
     "projects": "Proyectos",
     "suppliers": "Proveedores",
@@ -18,7 +19,7 @@
     "title": "Panel de Control",
     "subtitle": "Resumen general de matrices de precios, proyectos y proveedores",
     "stats": {
-      "totalProjects": "Proyectos Activos",
+      "totalProjects": "Proyectos",
       "totalSuppliers": "Proveedores Registrados",
       "totalItems": "Ítems Analizados",
       "potentialSavings": "Ahorro Estimado"
@@ -33,7 +34,8 @@
     "noRecentProjects": "No hay proyectos recientes creados",
     "createFirstProject": "Comienza creando tu primer proyecto o importando una matriz de Excel.",
     "marketTrends": "Ahorro potencial por proyecto",
-    "chartPlaceholder": "Ahorro estimado a partir de las diferencias entre los precios disponibles de cada partida."
+    "chartPlaceholder": "Ahorro estimado a partir de las diferencias entre los precios disponibles de cada partida.",
+    "chartEmpty": "Aún no hay comparaciones suficientes para mostrar datos."
   },
   "projects": {
     "title": "Gestión de Proyectos",
@@ -80,6 +82,8 @@
     "newInline": "Nuevo proveedor",
     "empty": "Aún no hay proveedores registrados.",
     "noProjects": "Sin proyectos",
+    "searchPlaceholder": "Buscar proveedores o proyectos...",
+    "noSearchResults": "No hay proveedores que coincidan con la búsqueda.",
     "deleteConfirm": "¿Eliminar al proveedor {{name}}? Sus cotizaciones asociadas también se eliminarán."
   },
   "excel": {
@@ -88,8 +92,14 @@
     "choose": "Elegir archivo Excel",
     "preview": "Vista previa de importación",
     "rowsDetected": "{{count}} items detectadas",
-    "groupsDetected": "{{count}} grupos de precios",
-    "needSuppliers": "Se requiere un proveedor asociado para cada grupo detectado.",
+    "groupsDetected": "{{count}} grupos completos detectados",
+    "steps": {
+      "project": "Proyecto",
+      "file": "Archivo",
+      "review": "Revisar y asignar",
+      "confirm": "Importar"
+    },
+    "needSuppliers": "Se requiere un proveedor asociado para cada grupo completo detectado.",
     "assignGroups": "Asignar grupos a proveedores",
     "uniqueSupplierPerGroup": "Cada proveedor se asigna una sola vez porque el proyecto guarda una cotización por proveedor y item.",
     "assignAllGroups": "Asocia o crea proveedores y asigna uno a cada grupo para continuar.",
@@ -203,13 +213,17 @@
       "description": "Estado y ubicación del almacenamiento local gestionado con Prisma",
       "status": "Estado de conexión",
       "connected": "Conectado a SQLite",
-      "checkButton": "Verificar Conexión"
+      "checkButton": "Verificar Conexión",
+      "error": "Error de conexión con la base de datos",
+      "unavailable": "No disponible"
     },
     "systemInfo": {
       "title": "Información del Sistema",
       "desktopEngine": "Motor de escritorio",
       "frontend": "Frontend",
-      "orm": "ORM y Persistencia"
+      "orm": "ORM y Persistencia",
+      "description": "Tecnologías activas en esta instalación",
+      "internationalization": "Internacionalización"
     }
   },
   "common": {

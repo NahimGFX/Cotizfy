@@ -8,6 +8,7 @@
     "disconnected": "Disconnected"
   },
   "nav": {
+    "workspace": "Workspace",
     "dashboard": "Dashboard",
     "projects": "Projects",
     "suppliers": "Suppliers",
@@ -18,7 +19,7 @@
     "title": "Control Panel",
     "subtitle": "Overview of price matrices, projects, and suppliers",
     "stats": {
-      "totalProjects": "Active Projects",
+      "totalProjects": "Projects",
       "totalSuppliers": "Registered Suppliers",
       "totalItems": "Analyzed Items",
       "potentialSavings": "Estimated Savings"
@@ -33,7 +34,8 @@
     "noRecentProjects": "No recent projects found",
     "createFirstProject": "Get started by creating your first project or importing an Excel matrix.",
     "marketTrends": "Potential savings by project",
-    "chartPlaceholder": "Estimated savings from the price differences between available quotes for each item."
+    "chartPlaceholder": "Estimated savings from the price differences between available quotes for each item.",
+    "chartEmpty": "There are not enough comparisons to show data yet."
   },
   "projects": {
     "title": "Project Management",
@@ -80,6 +82,8 @@
     "newInline": "New supplier",
     "empty": "No suppliers registered yet.",
     "noProjects": "No projects",
+    "searchPlaceholder": "Search suppliers or projects...",
+    "noSearchResults": "No suppliers match your search.",
     "deleteConfirm": "Delete supplier {{name}}? Its associated quotes will also be deleted."
   },
   "excel": {
@@ -88,8 +92,14 @@
     "choose": "Choose Excel file",
     "preview": "Import preview",
     "rowsDetected": "{{count}} budget items detected",
-    "groupsDetected": "{{count}} price groups",
-    "needSuppliers": "An associated supplier is required for every detected group.",
+    "groupsDetected": "{{count}} complete groups detected",
+    "steps": {
+      "project": "Project",
+      "file": "File",
+      "review": "Review and assign",
+      "confirm": "Import"
+    },
+    "needSuppliers": "An associated supplier is required for every complete group detected.",
     "assignGroups": "Assign groups to suppliers",
     "uniqueSupplierPerGroup": "Each supplier can be assigned once because a project stores one quote per supplier and item.",
     "assignAllGroups": "Associate or create suppliers, then assign one to every group to continue.",
@@ -203,13 +213,17 @@
       "description": "Status and location of local storage managed by Prisma",
       "status": "Connection status",
       "connected": "Connected to SQLite",
-      "checkButton": "Check Connection"
+      "checkButton": "Check Connection",
+      "error": "Database connection error",
+      "unavailable": "Unavailable"
     },
     "systemInfo": {
       "title": "System Information",
       "desktopEngine": "Desktop Engine",
       "frontend": "Frontend",
-      "orm": "ORM & Persistence"
+      "orm": "ORM & Persistence",
+      "description": "Technologies active in this installation",
+      "internationalization": "Internationalization"
     }
   },
   "common": {
