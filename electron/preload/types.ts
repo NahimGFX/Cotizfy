@@ -67,6 +67,81 @@ export interface ProjectBudgetItem {
   }[];
 }
 
+export interface AnalysisPdfReportData {
+  projectName: string;
+  currency: string;
+  locale: "es-EC" | "en-US";
+  generatedAt: string;
+  selectedSuppliers: string[];
+  selectedItemCount: number;
+  coveredItemCount: number;
+  optimizedTotal: number;
+  lowestSupplierTotal: number | null;
+  lowestSupplierNames: string[];
+  highestSupplierTotal: number | null;
+  highestSupplierNames: string[];
+  supplierRows: {
+    name: string;
+    total: number | null;
+    lowestWins: number;
+    ties: number;
+    differenceAmount: number | null;
+    differencePercent: number | null;
+    participationPercent: number | null;
+    totalQuotes: number;
+  }[];
+  itemComparisons: {
+    itemNumber: string;
+    description: string;
+    quantity: number;
+    unit: string;
+    lowestSupplierNames: string[];
+    spreadAmount: number | null;
+    spreadPercent: number | null;
+    quotes: {
+      supplierName: string;
+      hasQuote: boolean;
+      unitPrice: number | null;
+      totalPrice: number | null;
+    }[];
+  }[];
+  labels: {
+    title: string;
+    generatedAt: string;
+    project: string;
+    currency: string;
+    selectedSuppliers: string;
+    selectedItems: string;
+    coverage: string;
+    coveredItems: string;
+    uncoveredItems: string;
+    optimizedTotal: string;
+    lowestTotal: string;
+    highestTotal: string;
+    supplierAnalysis: string;
+    supplier: string;
+    quotedTotal: string;
+    lowestWins: string;
+    ties: string;
+    difference: string;
+    differencePercent: string;
+    participation: string;
+    itemsQuoted: string;
+    itemComparison: string;
+    item: string;
+    description: string;
+    quantity: string;
+    unit: string;
+    unitPrice: string;
+    totalPrice: string;
+    lowestSupplier: string;
+    spread: string;
+    spreadPercent: string;
+    tie: string;
+    noQuote: string;
+  };
+}
+
 export interface ElectronAPI {
   // App & System info
   getAppVersion: () => Promise<string>;
@@ -100,11 +175,6 @@ export interface ElectronAPI {
     },
   ) => Promise<IpcResponse<{ id: string; name: string }>>;
   deleteProject: (id: string) => Promise<IpcResponse<boolean>>;
-  getProjectVatPercent: (projectId: string) => Promise<IpcResponse<number>>;
-  setProjectVatPercent: (
-    projectId: string,
-    vatPercent: number,
-  ) => Promise<IpcResponse<boolean>>;
   getSuppliers: () => Promise<IpcResponse<SupplierRecord[]>>;
   saveSupplier: (data: {
     id?: string;
@@ -142,6 +212,9 @@ export interface ElectronAPI {
   getProjectItems: (
     projectId: string,
   ) => Promise<IpcResponse<ProjectBudgetItem[]>>;
+  exportAnalysisPdf: (
+    report: AnalysisPdfReportData,
+  ) => Promise<IpcResponse<{ saved: boolean }>>;
   createBudgetItem: (
     projectId: string,
     data: {

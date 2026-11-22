@@ -23,7 +23,6 @@ try {
   const parserBundle = path.join(isolatedDirectory, "excel.cjs");
   const importerBundle = path.join(isolatedDirectory, "importer.cjs");
   const comparisonBundle = path.join(isolatedDirectory, "comparison.cjs");
-  const settingsBundle = path.join(isolatedDirectory, "project-settings.cjs");
   buildSync({
     entryPoints: [path.join(root, "electron/main/excel.ts")],
     bundle: true,
@@ -45,19 +44,9 @@ try {
     format: "cjs",
     outfile: comparisonBundle,
   });
-  buildSync({
-    entryPoints: [path.join(root, "electron/main/projectSettings.ts")],
-    bundle: true,
-    platform: "node",
-    format: "cjs",
-    outfile: settingsBundle,
-  });
   const { parseExcelMatrix } = require(parserBundle);
   const { importExcelRows } = require(importerBundle);
   const { calculatePriceComparison } = require(comparisonBundle);
-  const { getProjectVatPercent, setProjectVatPercent } = require(
-    settingsBundle,
-  );
 
   const matrix = [
     [
@@ -297,12 +286,6 @@ try {
   const project = await prisma.project.create({
     data: { name: "Isolated Excel integration" },
   });
-  assert.equal(await getProjectVatPercent(prisma, project.id), 15);
-  await setProjectVatPercent(prisma, project.id, 12.5);
-  await assert.rejects(
-    () => setProjectVatPercent(prisma, project.id, -1),
-    /between 0 and 100/,
-  );
   const firstSupplier = await prisma.supplier.create({
     data: { name: "Supplier 1" },
   });
@@ -338,7 +321,6 @@ try {
   );
   await prisma.$disconnect();
   prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
-  assert.equal(await getProjectVatPercent(prisma, project.id), 12.5);
 
   const stored = await prisma.budgetItem.findMany({
     where: { projectId: project.id },
@@ -573,7 +555,7 @@ try {
   );
 
   console.log(
-    "Excel integration passed: XLSX/XLS parsing; dynamic price groups; validation; project/supplier links; quote mapping; SQLite reopen; per-project VAT persistence; unlinked supplier rejection; transaction rollback.",
+    "Excel integration passed: XLSX/XLS parsing; dynamic price groups; validation; project/supplier links; quote mapping; SQLite reopen; unlinked supplier rejection; transaction rollback.",
   );
 } finally {
   await prisma?.$disconnect().catch(() => {});

@@ -17,8 +17,6 @@ export interface PartDistribution {
 
 export interface SupplierFinancialRow {
   supplier: ComparisonSupplier;
-  subtotal: number | null;
-  vat: number | null;
   total: number | null;
   totalQuotes: number;
   itemsQuoted: number;
@@ -35,14 +33,11 @@ export interface FinancialAnalysis {
   comparison: PriceComparison;
   selectedItemCount: number;
   selectedSupplierCount: number;
-  vatPercent: number;
-  referenceSubtotal: number;
-  referenceVat: number;
-  referenceTotal: number;
-  potentialSavings: number;
-  potentialSavingsPercent: number | null;
+  optimizedTotal: number;
   lowestSupplierTotal: number | null;
   highestSupplierTotal: number | null;
+  lowestSupplierNames: string[];
+  highestSupplierNames: string[];
   referenceCoveredItems: number;
   uncoveredItems: number;
   distribution: PartDistribution[];
@@ -50,21 +45,13 @@ export interface FinancialAnalysis {
   coverageIncomplete: boolean;
 }
 
-/**
- * Recalculates the financial dashboard from stored quote values. The reference
- * distribution uses the lowest available total per item when several suppliers
- * are selected; it never synthesizes a missing quote.
- */
+/** Rebuilds filtered financial summaries from stored quote totals. */
 export function calculateFinancialAnalysis(
   items: ProjectBudgetItem[],
   suppliers: ComparisonSupplier[],
   selectedSupplierIds: string[],
   selectedItemIds: string[],
-  vatPercent: number,
 ): FinancialAnalysis {
-  if (!Number.isFinite(vatPercent) || vatPercent < 0 || vatPercent > 100)
-    throw new RangeError("VAT percentage must be between 0 and 100.");
-
   const selectedSupplierSet = new Set(selectedSupplierIds);
   const selectedItemSet = new Set(selectedItemIds);
   const filteredSuppliers = suppliers.filter((supplier) =>
@@ -85,45 +72,43 @@ export function calculateFinancialAnalysis(
         ): candidate is { supplier: ComparisonSupplier; total: number } =>
           candidate.total !== null && Number.isFinite(candidate.total),
       );
-    if (!available.length) return null;
-    if (filteredSuppliers.length === 1) return available[0];
-    return available.reduce((lowest, candidate) =>
-      candidate.total < lowest.total ? candidate : lowest,
-    );
+    return available.length
+      ? available.reduce((lowest, candidate) =>
+          candidate.total < lowest.total ? candidate : lowest,
+        )
+      : null;
   });
 
-  const referenceSubtotal = partValues.reduce(
+  const optimizedTotal = partValues.reduce(
     (sum, value) => sum + (value?.total ?? 0),
     0,
   );
-  const referenceVat = referenceSubtotal * (vatPercent / 100);
-  const referenceTotal = referenceSubtotal + referenceVat;
   const referenceCoveredItems = partValues.filter(Boolean).length;
-  const maximumAvailableTotal = comparison.items.reduce((sum, entry) => {
-    const totals = filteredSuppliers
-      .map((supplier) => entry.quotes[supplier.id]?.totalPrice ?? null)
-      .filter(
-        (total): total is number => total !== null && Number.isFinite(total),
-      );
-    return sum + (totals.length ? Math.max(...totals) : 0);
-  }, 0);
-  const potentialSavings = maximumAvailableTotal - referenceSubtotal;
-  const distribution = comparison.items.flatMap((entry, index) => {
-    const value = partValues[index];
-    if (!value) return [];
-    return [
-      {
-        itemId: entry.item.id,
-        itemNumber: entry.item.itemNumber,
-        description: entry.item.description,
-        total: value.total,
-        supplierId: value.supplier.id,
-        supplierName: value.supplier.name,
-        sharePercent:
-          referenceSubtotal > 0 ? (value.total / referenceSubtotal) * 100 : 0,
-      },
-    ];
-  });
+  const distribution = comparison.items
+    .flatMap((entry, index) => {
+      const value = partValues[index];
+      if (!value) return [];
+      return [
+        {
+          itemId: entry.item.id,
+          itemNumber: entry.item.itemNumber,
+          description: entry.item.description,
+          total: value.total,
+          supplierId: value.supplier.id,
+          supplierName: value.supplier.name,
+          sharePercent:
+            optimizedTotal > 0 ? (value.total / optimizedTotal) * 100 : 0,
+        },
+      ];
+    })
+    .sort(
+      (a, b) =>
+        b.total - a.total ||
+        a.itemNumber.localeCompare(b.itemNumber, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+    );
 
   const supplierRows: SupplierFinancialRow[] = comparison.suppliers.map(
     (stat) => {
@@ -136,13 +121,9 @@ export function calculateFinancialAnalysis(
           quote?.quote !== undefined &&
           quote.totalPrice !== null,
       ).length;
-      const subtotal = totalQuotes > 0 ? stat.quotedTotal : null;
-      const vat = subtotal === null ? null : subtotal * (vatPercent / 100);
       return {
         supplier: stat.supplier,
-        subtotal,
-        vat,
-        total: subtotal === null ? null : subtotal + (vat ?? 0),
+        total: totalQuotes > 0 ? stat.quotedTotal : null,
         totalQuotes,
         itemsQuoted: stat.itemsQuoted,
         lowestWins: stat.lowestWins,
@@ -155,7 +136,7 @@ export function calculateFinancialAnalysis(
         differencePercent: null,
         participationPercent: null,
         isCheapest: false,
-      } satisfies SupplierFinancialRow;
+      };
     },
   );
 
@@ -163,17 +144,11 @@ export function calculateFinancialAnalysis(
     (row): row is SupplierFinancialRow & { total: number } =>
       row.total !== null,
   );
-  const coverageBySupplier = comparison.suppliers
-    .filter((stat) =>
-      supplierRows.some(
-        (row) => row.supplier.id === stat.supplier.id && row.total !== null,
-      ),
-    )
-    .map((stat) =>
-      comparison.items.map(
-        (entry) => entry.quotes[stat.supplier.id]?.totalPrice !== null,
-      ),
-    );
+  const coverageBySupplier = comparable.map((row) =>
+    comparison.items.map(
+      (entry) => entry.quotes[row.supplier.id]?.totalPrice != null,
+    ),
+  );
   const hasComparableCoverage =
     coverageBySupplier.length > 0 &&
     coverageBySupplier.every((coverage) =>
@@ -185,11 +160,11 @@ export function calculateFinancialAnalysis(
     comparable.length && hasComparableCoverage
       ? Math.min(...comparable.map((row) => row.total))
       : null;
-  const supplierTotalsSum = comparable.reduce((sum, row) => sum + row.total, 0);
   const highestTotal =
     lowestTotal === null
       ? null
       : Math.max(...comparable.map((row) => row.total as number));
+  const supplierTotalsSum = comparable.reduce((sum, row) => sum + row.total, 0);
   const financialSuppliers = supplierRows.map((row) => ({
     ...row,
     differenceAmount:
@@ -212,17 +187,21 @@ export function calculateFinancialAnalysis(
     comparison,
     selectedItemCount: filteredItems.length,
     selectedSupplierCount: filteredSuppliers.length,
-    vatPercent,
-    referenceSubtotal,
-    referenceVat,
-    referenceTotal,
-    potentialSavings,
-    potentialSavingsPercent:
-      maximumAvailableTotal > 0
-        ? (potentialSavings / maximumAvailableTotal) * 100
-        : null,
+    optimizedTotal,
     lowestSupplierTotal: lowestTotal,
     highestSupplierTotal: highestTotal,
+    lowestSupplierNames:
+      lowestTotal === null
+        ? []
+        : comparable
+            .filter((row) => row.total === lowestTotal)
+            .map((row) => row.supplier.name),
+    highestSupplierNames:
+      highestTotal === null
+        ? []
+        : comparable
+            .filter((row) => row.total === highestTotal)
+            .map((row) => row.supplier.name),
     referenceCoveredItems,
     uncoveredItems: filteredItems.length - referenceCoveredItems,
     distribution,

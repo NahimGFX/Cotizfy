@@ -32,7 +32,7 @@ export async function importExcelRows(
     });
     if (allowed.length !== supplierIds.length)
       throw new Error("All suppliers must be associated with this project.");
-    const startOrder = await tx.budgetItem.count({ where: { projectId } });
+    const mergedRows = new Map<string, ImportedBudgetRow>();
     for (const [offset, row] of rows.entries()) {
       if (
         !row ||
@@ -49,17 +49,6 @@ export async function importExcelRows(
           `Invalid budget row at spreadsheet row ${row?.rowNumber ?? offset + 1}.`,
         );
       }
-      const item = await tx.budgetItem.create({
-        data: {
-          projectId,
-          itemNumber: row.itemNumber.trim(),
-          description: row.description.trim(),
-          quantity: row.quantity,
-          unit: row.unit.trim(),
-          orderIndex: startOrder + offset,
-        },
-      });
-
       for (const [group, quote] of row.quotes.entries()) {
         if (
           !quote ||
@@ -70,17 +59,97 @@ export async function importExcelRows(
         ) {
           throw new Error(`Invalid quote at spreadsheet row ${row.rowNumber}.`);
         }
-        if (quote.unitPrice === null && quote.totalPrice === null) continue;
+      }
+
+      const normalizedItemNumber = row.itemNumber.trim().toLocaleLowerCase();
+      const previous = mergedRows.get(normalizedItemNumber);
+      if (!previous) {
+        mergedRows.set(normalizedItemNumber, {
+          ...row,
+          itemNumber: row.itemNumber.trim(),
+          description: row.description.trim(),
+          unit: row.unit.trim(),
+          quotes: row.quotes.map((quote) => ({ ...quote })),
+        });
+        continue;
+      }
+
+      // Keep the latest item details and the latest non-empty quote per supplier.
+      previous.itemNumber = row.itemNumber.trim();
+      previous.description = row.description.trim();
+      previous.quantity = row.quantity;
+      previous.unit = row.unit.trim();
+      previous.rowNumber = row.rowNumber;
+      for (const [group, quote] of row.quotes.entries()) {
+        if (quote.unitPrice !== null || quote.totalPrice !== null)
+          previous.quotes[group] = { ...quote };
+      }
+    }
+
+    const existingItems = await tx.budgetItem.findMany({
+      where: { projectId },
+    });
+    const itemByNumber = new Map(
+      existingItems.map((item) => [
+        item.itemNumber.trim().toLocaleLowerCase(),
+        item,
+      ]),
+    );
+    let nextOrder = existingItems.length;
+
+    for (const row of mergedRows.values()) {
+      const key = row.itemNumber.trim().toLocaleLowerCase();
+      const existing = itemByNumber.get(key);
+      const item = existing
+        ? await tx.budgetItem.update({
+            where: { id: existing.id },
+            data: {
+              itemNumber: row.itemNumber.trim(),
+              description: row.description.trim(),
+              quantity: row.quantity,
+              unit: row.unit.trim(),
+            },
+          })
+        : await tx.budgetItem.create({
+            data: {
+              projectId,
+              itemNumber: row.itemNumber.trim(),
+              description: row.description.trim(),
+              quantity: row.quantity,
+              unit: row.unit.trim(),
+              orderIndex: nextOrder++,
+            },
+          });
+      itemByNumber.set(key, item);
+
+      for (const [group, quote] of row.quotes.entries()) {
+        if (quote.unitPrice === null && quote.totalPrice === null) {
+          await tx.itemQuote.deleteMany({
+            where: { itemId: item.id, supplierId: supplierIds[group] },
+          });
+          continue;
+        }
         const missing = [
           quote.unitPrice === null ? "unit price" : "",
           quote.totalPrice === null ? "total price" : "",
         ]
           .filter(Boolean)
           .join(" and ");
-        await tx.itemQuote.create({
-          data: {
+        await tx.itemQuote.upsert({
+          where: {
+            itemId_supplierId: {
+              itemId: item.id,
+              supplierId: supplierIds[group],
+            },
+          },
+          create: {
             itemId: item.id,
             supplierId: supplierIds[group],
+            unitPrice: quote.unitPrice ?? 0,
+            totalPrice: quote.totalPrice ?? 0,
+            notes: missing ? `Empty ${missing} in imported workbook.` : null,
+          },
+          update: {
             unitPrice: quote.unitPrice ?? 0,
             totalPrice: quote.totalPrice ?? 0,
             notes: missing ? `Empty ${missing} in imported workbook.` : null,
@@ -89,5 +158,6 @@ export async function importExcelRows(
       }
     }
   });
-  return rows.length;
+  return new Set(rows.map((row) => row.itemNumber.trim().toLocaleLowerCase()))
+    .size;
 }

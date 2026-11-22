@@ -22,8 +22,11 @@ export interface ExcelPreview {
 const REQUIRED = ["ITEM", "DESCRIPCION", "CANTIDAD", "UNIDAD"];
 
 function isEmptyCell(value: unknown): boolean {
-  return value === null || value === undefined ||
-    (typeof value === "string" && value.trim() === "");
+  return (
+    value === null ||
+    value === undefined ||
+    (typeof value === "string" && value.trim() === "")
+  );
 }
 
 function parseNumber(value: unknown): number | null {
@@ -114,11 +117,7 @@ export function parseExcelMatrix(
   const identifiers = new Map<string, number[]>();
   for (let i = headerRow + 1; i < data.length; i++) {
     const source = data[i];
-    if (
-      !source ||
-      source.every(isEmptyCell)
-    )
-      continue;
+    if (!source || source.every(isEmptyCell)) continue;
     const rowNumber = i + 1;
     const itemNumber = String(source[index.ITEM] ?? "").trim();
     const description = String(source[index.DESCRIPCION] ?? "").trim();
@@ -172,9 +171,19 @@ export function parseExcelMatrix(
         totalPrice >= 0;
       if (itemNumber && !completeQuote) {
         const missing = new Set<string>();
-        if (unitCol < 0 || unitPrice === null || !Number.isFinite(unitPrice) || unitPrice < 0)
+        if (
+          unitCol < 0 ||
+          unitPrice === null ||
+          !Number.isFinite(unitPrice) ||
+          unitPrice < 0
+        )
           missing.add(`PRECIO UNITARIO_${group}`);
-        if (totalCol < 0 || totalPrice === null || !Number.isFinite(totalPrice) || totalPrice < 0)
+        if (
+          totalCol < 0 ||
+          totalPrice === null ||
+          !Number.isFinite(totalPrice) ||
+          totalPrice < 0
+        )
           missing.add(`PRECIO TOTAL_${group}`);
         if (missing.size) state.incomplete.set(rowNumber, missing);
       }
@@ -216,8 +225,8 @@ export function parseExcelMatrix(
     if (locations.length > 1)
       warnings.push(
         en
-          ? `Duplicate ITEM "${id}" on rows ${locations.join(", ")}.`
-          : `El ITEM "${id}" está repetido en las filas ${locations.join(", ")}.`,
+          ? `Duplicate ITEM "${id}" on rows ${locations.join(", ")}; these rows will be merged into one item during import.`
+          : `El ITEM "${id}" está repetido en las filas ${locations.join(", ")}; se combinarán en una sola partida al importar.`,
       );
   const groups = groupNumbers.filter((group) => {
     const state = groupData.get(group)!;
@@ -232,8 +241,9 @@ export function parseExcelMatrix(
       rows.length > 0;
     if (!complete) {
       const affected = [...state.incomplete.entries()]
-        .map(([row, columns]) =>
-          `${en ? "row" : "fila"} ${row} (${[...columns].join(", ")})`,
+        .map(
+          ([row, columns]) =>
+            `${en ? "row" : "fila"} ${row} (${[...columns].join(", ")})`,
         )
         .join("; ");
       const missingHeaders = [
@@ -244,7 +254,9 @@ export function parseExcelMatrix(
         missingHeaders.length
           ? `${en ? "missing columns" : "faltan columnas"}: ${missingHeaders.join(", ")}`
           : "",
-        affected ? `${en ? "incomplete values" : "valores incompletos"}: ${affected}` : "",
+        affected
+          ? `${en ? "incomplete values" : "valores incompletos"}: ${affected}`
+          : "",
       ].filter(Boolean);
       warnings.push(
         en

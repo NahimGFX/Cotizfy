@@ -1,9 +1,10 @@
 import { ipcMain, app, BrowserWindow } from "electron";
 import { dialog } from "electron";
 import fs from "fs";
+import path from "path";
 import { parseExcelMatrix, type ImportedBudgetRow } from "../excel";
 import { importExcelRows } from "../importer";
-import { getProjectVatPercent, setProjectVatPercent } from "../projectSettings";
+import { analysisPdfReportSchema, buildAnalysisPdfHtml } from "../analysisPdf";
 import { getPrismaClient, initDatabase } from "../db";
 import type {
   IpcResponse,
@@ -14,6 +15,87 @@ import type {
 export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // App info
   ipcMain.handle("app:getVersion", () => app.getVersion());
+
+  ipcMain.handle("analysis:exportPdf", async (_event, rawReport: unknown) => {
+    const validation = analysisPdfReportSchema.safeParse(rawReport);
+    if (!validation.success) {
+      return {
+        success: false,
+        error: "The analysis report data is invalid.",
+      };
+    }
+
+    const report = validation.data;
+    const comparisonQuoteCount = report.itemComparisons.reduce(
+      (count, item) => count + item.quotes.length,
+      0,
+    );
+    if (comparisonQuoteCount > 100000) {
+      return {
+        success: false,
+        error: "The filtered comparison is too large to export in one PDF.",
+      };
+    }
+    const safeProjectName =
+      report.projectName
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9-_]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "Cotizfy";
+    let pdfWindow: BrowserWindow | null = null;
+
+    try {
+      const saveResult = await dialog.showSaveDialog(mainWindow, {
+        title:
+          report.locale === "es-EC"
+            ? "Guardar análisis en PDF"
+            : "Save analysis as PDF",
+        defaultPath: path.join(
+          app.getPath("documents"),
+          `${safeProjectName}-analysis.pdf`,
+        ),
+        buttonLabel: report.locale === "es-EC" ? "Guardar PDF" : "Save PDF",
+        filters: [{ name: "PDF", extensions: ["pdf"] }],
+      });
+      if (saveResult.canceled || !saveResult.filePath) {
+        return { success: true, data: { saved: false } };
+      }
+
+      pdfWindow = new BrowserWindow({
+        show: false,
+        width: 1280,
+        height: 900,
+        webPreferences: {
+          contextIsolation: true,
+          nodeIntegration: false,
+          sandbox: true,
+        },
+      });
+      const html = buildAnalysisPdfHtml(report);
+      await pdfWindow.loadURL(
+        `data:text/html;charset=utf-8,${encodeURIComponent(html)}`,
+      );
+      const pdf = await pdfWindow.webContents.printToPDF({
+        pageSize: "A4",
+        landscape: true,
+        printBackground: true,
+        margins: { top: 0.45, bottom: 0.45, left: 0.45, right: 0.45 },
+      });
+      await fs.promises.writeFile(saveResult.filePath, pdf);
+      return { success: true, data: { saved: true } };
+    } catch (error) {
+      console.error("Failed to export analysis PDF:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not export the analysis PDF.",
+      };
+    } finally {
+      if (pdfWindow && !pdfWindow.isDestroyed()) pdfWindow.close();
+    }
+  });
 
   // Window management
   ipcMain.on("window:minimize", () => mainWindow.minimize());
@@ -91,39 +173,6 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       } catch (error) {
         console.error("Failed to save theme setting:", error);
         return false;
-      }
-    },
-  );
-
-  // VAT is stored in the existing AppSetting table and scoped to a project.
-  ipcMain.handle(
-    "projects:getVatPercent",
-    async (_event, projectId: string) => {
-      try {
-        return {
-          success: true,
-          data: await getProjectVatPercent(getPrismaClient(), projectId),
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Could not load VAT.",
-        };
-      }
-    },
-  );
-
-  ipcMain.handle(
-    "projects:setVatPercent",
-    async (_event, projectId: string, vatPercent: number) => {
-      try {
-        await setProjectVatPercent(getPrismaClient(), projectId, vatPercent);
-        return { success: true, data: true };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Could not save VAT.",
-        };
       }
     },
   );
@@ -275,9 +324,6 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         throw new Error("Invalid project id.");
       const prisma = getPrismaClient();
       await prisma.$transaction(async (tx) => {
-        await tx.appSetting.deleteMany({
-          where: { key: `project:${id}:vat-percent` },
-        });
         await tx.project.delete({ where: { id } });
       });
       return { success: true, data: true };

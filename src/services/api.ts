@@ -44,6 +44,10 @@ const dummyApi: ElectronAPI = {
     data: { importedCount: rows.length },
   }),
   getProjectItems: async () => ({ success: true, data: [] }),
+  exportAnalysisPdf: async () => ({
+    success: false,
+    error: "PDF export is only available in the desktop app.",
+  }),
   createProject: async (data) => ({
     success: true,
     data: { id: "mock-1", name: data.name },
@@ -53,8 +57,6 @@ const dummyApi: ElectronAPI = {
     data: { id, name: data.name },
   }),
   deleteProject: async () => ({ success: true, data: true }),
-  getProjectVatPercent: async () => ({ success: true, data: 15 }),
-  setProjectVatPercent: async () => ({ success: true, data: true }),
   createBudgetItem: async (_projectId, data) => ({
     success: true,
     data: { id: "mock-item", ...data, quotes: [] },

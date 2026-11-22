@@ -34,17 +34,18 @@ export const ExcelImportPanel: React.FC<Props> = ({
   const [newSupplierName, setNewSupplierName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  const [importedCount, setImportedCount] = useState<number | null>(null);
   const card = "surface-card text-slate-900 dark:text-slate-100";
   useEffect(() => {
     setSelection(null);
     setSupplierIds([]);
     setError("");
-    setDone(false);
+    setImportedCount(null);
   }, [project.id]);
   const chooseFile = async () => {
     setBusy(true);
     setError("");
+    setImportedCount(null);
     try {
       const language = i18n.resolvedLanguage?.startsWith("en") ? "en" : "es";
       const [result, catalogResult] = await Promise.all([
@@ -149,7 +150,10 @@ export const ExcelImportPanel: React.FC<Props> = ({
         setError(result.error || t("excel.importError"));
         return;
       }
-      setDone(true);
+      setImportedCount(
+        result.data?.importedCount ?? selection.preview.rows.length,
+      );
+      setSelection(null);
       onImported();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("excel.importError"));
@@ -160,7 +164,6 @@ export const ExcelImportPanel: React.FC<Props> = ({
   const close = () => {
     setSelection(null);
     setError("");
-    setDone(false);
   };
   const updateAssignment = (groupIndex: number, supplierId: string) =>
     setSupplierIds((current) =>
@@ -211,13 +214,28 @@ export const ExcelImportPanel: React.FC<Props> = ({
           {error}
         </p>
       )}
-      {done && (
-        <p
+      {importedCount !== null && (
+        <div
           role="status"
-          className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+          aria-live="polite"
+          className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100"
         >
-          {t("excel.success")}
-        </p>
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">{t("excel.importSuccessTitle")}</p>
+            <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
+              {t("excel.successCount", { count: importedCount })}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setImportedCount(null)}
+            aria-label={t("common.close")}
+            className="-mr-1 -mt-1 rounded-lg p-1.5 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       )}
       {selection && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm">
@@ -252,8 +270,8 @@ export const ExcelImportPanel: React.FC<Props> = ({
             >
               {(["project", "file", "review", "confirm"] as const).map(
                 (step, index) => {
-                  const complete = index < 2 || (done && index === 2);
-                  const active = index === 2 ? !done : index === 3 && done;
+                  const complete = index < 2;
+                  const active = index === 2;
                   return (
                     <li
                       key={step}

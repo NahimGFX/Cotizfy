@@ -95,48 +95,46 @@ try {
     suppliers,
     allSupplierIds,
     allItemIds,
-    15,
   );
   assert.equal(allSelected.selectedSupplierCount, 3);
   assert.equal(allSelected.selectedItemCount, 4);
-  assert.equal(allSelected.referenceSubtotal, 7.5);
-  assert.equal(allSelected.referenceVat, 1.125);
-  assert.equal(allSelected.referenceTotal, 8.625);
-  assert.equal(allSelected.potentialSavings, 11.5);
-  assert.equal(allSelected.potentialSavingsPercent, (11.5 / 19) * 100);
+  assert.equal(allSelected.optimizedTotal, 7.5);
   assert.equal(allSelected.lowestSupplierTotal, null);
   assert.equal(allSelected.highestSupplierTotal, null);
   assert.equal(allSelected.uncoveredItems, 1);
   assert.equal(allSelected.coverageIncomplete, true);
-  assert.equal(allSelected.suppliers[0].subtotal, 13.5);
-  assert.equal(allSelected.suppliers[0].total, 15.525);
+  assert.equal(allSelected.suppliers[0].total, 13.5);
   assert.equal(allSelected.suppliers[0].differenceAmount, null);
   assert.equal(allSelected.suppliers[0].differencePercent, null);
   assert.equal(allSelected.suppliers[0].participationPercent > 0, true);
   assert.equal(allSelected.distribution.length, 3);
+  assert.deepEqual(
+    allSelected.distribution.map((part) => part.total),
+    [5, 2.5, 0],
+    "pie distribution sorts items by weight in descending order",
+  );
 
   const twoSuppliersTwoItems = calculateFinancialAnalysis(
     financialItems,
     suppliers,
     ["a", "b"],
     ["one", "tie"],
-    15,
   );
-  assert.equal(twoSuppliersTwoItems.referenceSubtotal, 7.5);
-  assert.equal(twoSuppliersTwoItems.referenceVat, 1.125);
-  assert.equal(twoSuppliersTwoItems.referenceTotal, 8.625);
-  assert.equal(twoSuppliersTwoItems.suppliers[0].total, 8.625);
-  assert.equal(twoSuppliersTwoItems.suppliers[1].total, 10.35);
+  assert.equal(twoSuppliersTwoItems.optimizedTotal, 7.5);
+  assert.equal(twoSuppliersTwoItems.suppliers[0].total, 7.5);
+  assert.equal(twoSuppliersTwoItems.suppliers[1].total, 9);
   assert.ok(
-    Math.abs(twoSuppliersTwoItems.suppliers[1].differenceAmount - 1.725) <
-      1e-10,
+    Math.abs(twoSuppliersTwoItems.suppliers[1].differenceAmount - 1.5) < 1e-10,
   );
   assert.ok(
     Math.abs(twoSuppliersTwoItems.suppliers[1].differencePercent - 20) < 1e-10,
   );
   assert.ok(
-    Math.abs(twoSuppliersTwoItems.distribution[0].sharePercent - 100 / 3) <
-      1e-10,
+    Math.abs(
+      twoSuppliersTwoItems.distribution.find((part) => part.itemId === "one")
+        .sharePercent -
+        100 / 3,
+    ) < 1e-10,
   );
 
   const oneSupplierAndItem = calculateFinancialAnalysis(
@@ -144,37 +142,9 @@ try {
     suppliers,
     ["a"],
     ["partial"],
-    12,
   );
-  assert.equal(oneSupplierAndItem.referenceSubtotal, 6);
-  assert.equal(oneSupplierAndItem.referenceVat, 0.72);
-  assert.equal(oneSupplierAndItem.referenceTotal, 6.72);
+  assert.equal(oneSupplierAndItem.optimizedTotal, 6);
   assert.equal(oneSupplierAndItem.suppliers[0].itemsQuoted, 1);
-
-  const noVat = calculateFinancialAnalysis(
-    financialItems,
-    suppliers,
-    ["a"],
-    ["one"],
-    0,
-  );
-  assert.equal(noVat.referenceTotal, noVat.referenceSubtotal);
-  assert.throws(
-    () =>
-      calculateFinancialAnalysis(financialItems, suppliers, ["a"], ["one"], -1),
-    /VAT percentage/,
-  );
-  assert.throws(
-    () =>
-      calculateFinancialAnalysis(
-        financialItems,
-        suppliers,
-        ["a"],
-        ["one"],
-        101,
-      ),
-    /VAT percentage/,
-  );
   const noQuotes = calculatePriceComparison([item("none", 1, [])], suppliers);
   assert.equal(noQuotes.potentialSavings, 0);
   assert.equal(noQuotes.savingsPercent, null);
@@ -189,15 +159,14 @@ try {
     suppliers.slice(0, 2),
     ["a", "b"],
     ["zero"],
-    15,
   );
-  assert.equal(zeroFinancial.referenceTotal, 0);
+  assert.equal(zeroFinancial.optimizedTotal, 0);
   assert.equal(zeroFinancial.suppliers[0].differenceAmount, 0);
   assert.equal(zeroFinancial.suppliers[0].differencePercent, null);
   assert.equal(zeroFinancial.suppliers[0].participationPercent, null);
   assert.equal(zeroFinancial.distribution[0].sharePercent, 0);
   console.log(
-    "Price comparison tests passed: supplier/item filters, VAT, savings, equal and unequal coverage, differing and tied prices, missing quotes, decimals, no quotes, and zero division.",
+    "Price comparison tests passed: supplier/item filters, descending item distribution, equal and unequal coverage, differing and tied prices, missing quotes, decimals, no quotes, and zero division.",
   );
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });

@@ -348,7 +348,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({
                   </section>
                   <FinancialAnalyticsPanel
                     key={selectedProject?.id || projectId}
-                    projectId={selectedProject?.id || projectId}
+                    projectName={selectedProject?.name || ""}
                     currency={selectedProject?.currency || "USD"}
                     items={items}
                     suppliers={comparisonSuppliers.map((supplier) => ({
