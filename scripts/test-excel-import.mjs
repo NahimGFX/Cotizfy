@@ -313,11 +313,11 @@ try {
       firstSupplier.id,
       secondSupplier.id,
     ]),
-    2,
+    1,
   );
   assert.equal(
     await prisma.budgetItem.count({ where: { projectId: project.id } }),
-    2,
+    1,
   );
   await prisma.$disconnect();
   prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
@@ -327,33 +327,65 @@ try {
     orderBy: { orderIndex: "asc" },
     include: { project: true, quotes: { include: { supplier: true } } },
   });
-  assert.equal(stored.length, 2);
+  assert.equal(stored.length, 1, "duplicate ITEM rows merge into one item");
   assert.equal(stored[0].project.id, project.id);
+  assert.equal(stored[0].description, "Cable adicional");
+  assert.equal(stored[0].quantity, 3);
   assert.deepEqual(
     stored[0].quotes
       .map((quote) => [quote.supplier.id, quote.unitPrice, quote.totalPrice])
       .sort((a, b) => a[0].localeCompare(b[0])),
     [
-      [firstSupplier.id, 2.5, 12.5],
-      [secondSupplier.id, 3, 15],
+      [firstSupplier.id, 4, 14],
+      [secondSupplier.id, 3, 9],
     ].sort((a, b) => a[0].localeCompare(b[0])),
   );
-  assert.equal(stored[1].quotes.length, 2);
-  const secondItemQuotes = [...stored[1].quotes].sort((a, b) =>
-    a.supplier.id.localeCompare(b.supplier.id),
-  );
-  const firstSupplierQuote = secondItemQuotes.find(
-    (quote) => quote.supplier.id === firstSupplier.id,
-  );
-  assert.ok(firstSupplierQuote);
-  assert.equal(firstSupplierQuote.unitPrice, 4);
-  assert.equal(firstSupplierQuote.totalPrice, 14);
   const comparison = calculatePriceComparison(stored, [
     { id: firstSupplier.id, name: firstSupplier.name },
     { id: secondSupplier.id, name: secondSupplier.name },
   ]);
-  assert.equal(comparison.items[0].lowest, 2.5);
-  assert.equal(comparison.items[1].lowest, 3);
+  assert.equal(comparison.items.length, 1);
+  assert.equal(comparison.items[0].lowest, 3);
+
+  assert.equal(
+    await importExcelRows(
+      prisma,
+      project.id,
+      [
+        {
+          ...parsed.rows[0],
+          itemNumber: " a-1 ",
+          description: "Updated on reimport",
+          quantity: 8,
+          unit: "ea",
+          quotes: [
+            { unitPrice: 1.5, totalPrice: 12 },
+            { unitPrice: 2, totalPrice: 16 },
+          ],
+        },
+      ],
+      [firstSupplier.id, secondSupplier.id],
+    ),
+    1,
+  );
+  const reimportedItem = await prisma.budgetItem.findFirst({
+    where: { projectId: project.id },
+    include: { quotes: true },
+  });
+  assert.equal(
+    await prisma.budgetItem.count({ where: { projectId: project.id } }),
+    1,
+    "reimport updates the existing item instead of adding a duplicate",
+  );
+  assert.equal(reimportedItem.description, "Updated on reimport");
+  assert.equal(reimportedItem.quantity, 8);
+  assert.deepEqual(
+    reimportedItem.quotes.map((quote) => [quote.unitPrice, quote.totalPrice]),
+    [
+      [1.5, 12],
+      [2, 16],
+    ],
+  );
 
   const initialCount = await prisma.budgetItem.count({
     where: { projectId: project.id },
@@ -395,7 +427,7 @@ try {
     await prisma.itemQuote.count({
       where: { budgetItem: { projectId: project.id } },
     }),
-    4,
+    2,
   );
 
   const dynamicProject = await prisma.project.create({
